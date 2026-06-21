@@ -8,6 +8,13 @@ const REVIEWER_COLORS: Record<string, string> = {
   quality: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/25',
   security: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/25',
   testing: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25',
+  architect: 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/25',
+  architecture: 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/25',
+  coder: 'text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/25',
+  devil_advocate: 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/25',
+  performance: 'text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/25',
+  reviewer: 'text-teal-600 dark:text-teal-400 bg-teal-500/10 border-teal-500/25',
+  frontend: 'text-pink-600 dark:text-pink-400 bg-pink-500/10 border-pink-500/25',
 }
 
 type ReviewerCardProps = {

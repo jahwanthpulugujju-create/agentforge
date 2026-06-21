@@ -108,7 +108,7 @@ for (const [type,phase,pnum,round,meta,t] of [
   ['phase_transition','aggregation',5,null,null,ago(3*DAY-20*MIN)],
   ['phase_transition','discourse',6,null,null,ago(3*DAY-25*MIN)],
   ['phase_transition','synthesis',7,null,null,ago(3*DAY-30*MIN)],
-  ['round_completed','complete',8,1,JSON.stringify({round:1,verdict:'changes_requested',blocker_count:2,suggestion_count:5,should_fix_count:3,reviewer_count:4,total_finding_count:10}),ago(3*DAY-34*MIN)],
+  ['round_completed','complete',8,1,JSON.stringify({round:1,verdict:'changes_requested',blocker_count:3,suggestion_count:6,should_fix_count:3,reviewer_count:6,total_finding_count:14}),ago(3*DAY-34*MIN)],
   ['session_closed','complete',8,null,null,ago(3*DAY-35*MIN)],
 ]) {
   run(`INSERT INTO orchestration_events (session_id,event_type,phase,phase_number,round,metadata,created_at) VALUES (?,?,?,?,?,?,?)`,
@@ -116,11 +116,11 @@ for (const [type,phase,pnum,round,meta,t] of [
 }
 
 run(`INSERT INTO review_rounds (session_id,round_number,verdict,blocker_count,suggestion_count,should_fix_count,final_md_path,parsed_at,source,reviewer_count,total_finding_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-  [S1,1,'changes_requested',2,5,3,join(D1,'round-1-final.md'),ago(3*DAY-32*MIN),'orchestrator',4,10])
+  [S1,1,'changes_requested',3,6,3,join(D1,'round-1-final.md'),ago(3*DAY-32*MIN),'orchestrator',6,14])
 
 const rnd1 = get('SELECT id FROM review_rounds WHERE session_id=? AND round_number=1',[S1])
 
-for (const [rtype,cnt] of [['security',3],['architecture',4],['testing',2],['performance',1]]) {
+for (const [rtype,cnt] of [['security',3],['architecture',4],['testing',2],['performance',1],['coder',2],['devil_advocate',2]]) {
   run(`INSERT INTO reviewer_outputs (round_id,reviewer_type,instance_number,file_path,finding_count,parsed_at) VALUES (?,?,?,?,?,?)`,
     [rnd1.id,rtype,1,join(D1,`round-1-${rtype}.md`),cnt,ago(3*DAY-28*MIN)])
 }
@@ -129,6 +129,8 @@ const secO  = get('SELECT id FROM reviewer_outputs WHERE round_id=? AND reviewer
 const archO = get('SELECT id FROM reviewer_outputs WHERE round_id=? AND reviewer_type=?',[rnd1.id,'architecture'])
 const testO = get('SELECT id FROM reviewer_outputs WHERE round_id=? AND reviewer_type=?',[rnd1.id,'testing'])
 const perfO = get('SELECT id FROM reviewer_outputs WHERE round_id=? AND reviewer_type=?',[rnd1.id,'performance'])
+const codeO = get('SELECT id FROM reviewer_outputs WHERE round_id=? AND reviewer_type=?',[rnd1.id,'coder'])
+const daO   = get('SELECT id FROM reviewer_outputs WHERE round_id=? AND reviewer_type=?',[rnd1.id,'devil_advocate'])
 
 const findings1 = [
   [secO.id,'JWT secret exposed in environment config','critical','blocker','src/auth/config.ts',12,14,'The JWT_SECRET is logged at DEBUG level via console.log on line 13. This exposes the secret in log aggregation systems.',1],
@@ -141,6 +143,10 @@ const findings1 = [
   [testO.id,'No tests for token expiry edge cases','medium','should_fix','tests/auth.test.ts',1,1,'Token refresh on expiry, expired refresh tokens, and clock-skew scenarios are not covered.',0],
   [testO.id,'Auth integration tests missing CSRF protection assertions','low','suggestion','tests/auth.integration.ts',45,60,'CSRF token validation is not asserted in integration tests.',0],
   [perfO.id,'Redundant DB query on every request in auth middleware','low','suggestion','src/auth/middleware.ts',55,65,'User record is fetched from DB on every authenticated request. Consider caching decoded token claims for the request lifetime.',0],
+  [codeO.id,'bcrypt rounds set to 10 — should be 12 for production','medium','suggestion','src/auth/validators.ts',15,15,'bcrypt.hash(password, 10) — OWASP recommends minimum 12 rounds for 2024 hardware.',0],
+  [codeO.id,'Refresh token not rotated on use','high','should_fix','src/auth/service.ts',112,118,'Refresh tokens are not invalidated after use (no rotation). Stolen token can be replayed indefinitely.',0],
+  [daO.id,'Why JWT at all? Session cookies are safer for this use case','medium','suggestion','src/auth/service.ts',1,1,'Stateless JWT requires refresh token infrastructure. For a monolith, server-side sessions with secure cookies eliminate the attack surface entirely.',0],
+  [daO.id,'OAuth state parameter not validated on callback','high','blocker','src/auth/oauth.ts',45,52,'The state parameter returned by OAuth providers is not verified against the stored value. This enables CSRF attacks on the OAuth flow.',1],
 ]
 for (const [oid,title,sev,cat,fp,ls,le,summary,isBlk] of findings1) {
   run(`INSERT INTO review_findings (reviewer_output_id,title,severity,category,file_path,line_start,line_end,summary,is_blocker,parsed_at) VALUES (?,?,?,?,?,?,?,?,?,?)`,
@@ -174,44 +180,90 @@ be addressed before merging.
 `,ago(3*DAY-8*MIN)])
 
 run(`INSERT INTO markdown_artifacts (session_id,artifact_type,round_number,file_path,content,parsed_at) VALUES (?,?,?,?,?,?)`,
-  [S1,'discourse',null,join(D1,'discourse.md'),`# Reviewer Discourse
+  [S1,'discourse',null,join(D1,'discourse.md'),`# ⚔️ War Room — Agent Debate
 
-<!-- reviewer:security -->
-## Security Reviewer
+## Round 1 · feature/auth-refactor
 
-Critical issues found in this refactor. The JWT secret exposure on line 13 of config.ts is a blocker — this will write your signing key to log files in production. I also found that password comparison in validators.ts uses direct string equality, which is fundamentally broken for bcrypt hashes and introduces a timing attack vulnerability.
+---
 
-<!-- reviewer:architecture -->
-## Architecture Reviewer
+### CHALLENGE — Devil's Advocate
 
-CHALLENGE to Security: The string comparison on line 87 — is that in the new code or a pre-existing issue that surfaced during the refactor?
+Hold on. Before we rubber-stamp this refactor, I'm questioning the fundamental approach. The PR description says "migrate to JWT for stateless auth" — but **why JWT?** This is a monolith running on a single server. We're adding refresh token rotation complexity, signing key management, and a whole new attack surface, when secure HttpOnly session cookies would eliminate all of it. I need Architect to justify this decision before we proceed.
 
-<!-- reviewer:security -->
-## Security Reviewer
+---
 
-RESPOND: It's in the new validators.ts file introduced in this PR. The old code used passport-local which handled this correctly. The refactor broke it.
+### SURFACE — Security
 
-<!-- reviewer:architecture -->
-## Architecture Reviewer
+I'll answer that while Architect considers it: **it doesn't matter right now because we have two critical regressions that must block merge regardless of the JWT debate.**
 
-AGREE with Security on both blockers. On the structural side, I flagged that AuthService directly instantiates UserRepository rather than depending on an interface. This makes the auth service untestable in isolation and violates the dependency inversion principle.
+Finding 1: \`src/auth/config.ts:13\` — the JWT secret is being logged via \`console.log(config)\`. This writes the signing key to every log aggregator the team has.
 
-The token refresh duplication is also concerning — same logic exists in 3 places and they've already drifted apart (the WebSocket handler uses a different expiry threshold).
+Finding 2: \`src/auth/validators.ts:87-89\` — password comparison is \`password === user.passwordHash\`. A bcrypt hash is one-way. This **always returns false**. Password auth is completely broken in this PR.
 
-<!-- reviewer:testing -->
-## Testing Reviewer
+Vote: **REJECT** — both are critical security regressions.
 
-CONNECT to Architecture's finding: the tight coupling to UserRepository is exactly why there are no unit tests for the happy path — you can't mock the DB dependency without refactoring first. The test coverage gaps aren't laziness, they're a structural symptom.
+---
 
-<!-- reviewer:performance -->
-## Performance Reviewer
+### CHALLENGE — Devil's Advocate
 
-Minor note: the middleware fetches a full user row on every authenticated request. Given the token already contains userId and roles, this is unnecessary overhead. A request-scoped cache would eliminate 1 DB round-trip per API call.
+AGREE with Security on the blockers — those are fatal. I'll add one more: \`src/auth/oauth.ts:45-52\` — the OAuth callback does not validate the \`state\` parameter against what was stored pre-redirect. This is a textbook CSRF vector on the OAuth flow. That's a third blocker.
 
-<!-- reviewer:architecture -->
-## Architecture Reviewer
+My original question about JWT vs sessions still stands, but it's secondary to shipping broken auth.
 
-AGREE with Performance — this is worth fixing but shouldn't block merge. Add to tech debt backlog.
+---
+
+### CONNECT — Coder
+
+I wrote this code. The session store approach was rejected in the planning doc (week 3) because we're moving toward a distributed deployment — the product roadmap has horizontal scaling in Q3. That's why JWT. I'll own the bugs Security and Devil's Advocate flagged — the string comparison was a copy-paste error from the old code I forgot to update, and the config logging was debug code I left in.
+
+Two questions: should I fix these in this PR or open a hotfix branch?
+
+---
+
+### SURFACE — Architect
+
+Fix in this PR — we haven't merged yet, no need for a separate branch. The JWT choice is correct given the roadmap. For the deployment concerns Devil's Advocate raised: I flagged that \`AuthService\` directly instantiates \`UserRepository\` — this violates dependency inversion and makes the service untestable. The coupling is blocking Testing from writing unit tests.
+
+---
+
+### AGREE — Testing
+
+Confirming Architect's analysis. I cannot mock the repository without refactoring the service first. The test gaps aren't laziness — the architecture prevents isolation. I've flagged: no tests for token expiry, clock skew, or refresh token rotation. Coder also hasn't implemented refresh token rotation, which means stolen tokens are replayable indefinitely.
+
+---
+
+### CONNECT — Performance
+
+I'll keep this brief: the auth middleware fetches a full user row on every authenticated request even though the JWT already contains \`userId\` and \`roles\`. That's an unnecessary round-trip per API call. Not a blocker — but at scale this adds up fast. bcrypt rounds are set to 10; OWASP 2024 minimum is 12.
+
+---
+
+### CHALLENGE — Devil's Advocate
+
+Final position: I'm voting REJECT on the current state, but I want to be clear this PR has good bones. Coder's instinct on distributed deployment is correct. The blockers are fixable in a day. My recommendation: fix the 3 blockers (JWT logging, bcrypt comparison, OAuth state), add rate limiting, rotate refresh tokens — then I'll flip to APPROVE.
+
+---
+
+### AGREE — Architect
+
+Consensus reached. The blockers are clear and actionable. Coder knows what to fix. Architecture concerns (dependency inversion, refresh duplication) can land in the same PR — they're straightforward refactors while you're already in the code.
+
+**VERDICT: REQUEST CHANGES — 3 blockers, fix within 24h, re-review.**
+
+---
+
+## 🗳️ Agent Vote Tally
+
+| Agent | Vote | Reason |
+|-------|------|--------|
+| Security | ❌ REJECT | 2 critical security blockers |
+| Devil's Advocate | ❌ REJECT | OAuth CSRF blocker + JWT design concerns |
+| Architect | ⚠️ APPROVE WITH CHANGES | Blocking architectural issues |
+| Coder | ⚠️ APPROVE WITH CHANGES | Owns the fixes, will resolve today |
+| Testing | ⚠️ APPROVE WITH CHANGES | Needs coupling fix before tests possible |
+| Performance | ✅ APPROVE | Minor suggestions only |
+
+**Result: 2 REJECT → REQUEST CHANGES required**
 `,ago(3*DAY-31*MIN)])
 
 run(`INSERT INTO markdown_artifacts (session_id,artifact_type,round_number,file_path,content,parsed_at) VALUES (?,?,?,?,?,?)`,
@@ -596,22 +648,29 @@ The real-time additions are well-scoped. Main risk area: WebSocket authenticatio
 ensure the same auth checks applied to REST endpoints are applied to socket connections.
 `,ago(8*MIN)])
 
-run(`INSERT INTO command_executions (uid,command,args,exit_code,pid,is_detached,started_at,finished_at,workflow_id,vendor,persona,instance_index,name,resolved_model,last_heartbeat_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  ['cmd-active-001','claude',JSON.stringify(['--no-color','--persona','security']),null,12345,1,ago(3*MIN),null,S4,'claude','security',1,'Security Reviewer','claude-opus-4-5',ago(25)])
-run(`INSERT INTO command_executions (uid,command,args,exit_code,pid,is_detached,started_at,finished_at,workflow_id,vendor,persona,instance_index,name,resolved_model,last_heartbeat_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  ['cmd-active-002','claude',JSON.stringify(['--no-color','--persona','frontend']),null,12346,1,ago(3*MIN),null,S4,'claude','frontend',2,'Frontend Reviewer','claude-sonnet-4-5',ago(40)])
-run(`INSERT INTO command_executions (uid,command,args,exit_code,pid,is_detached,started_at,finished_at,workflow_id,vendor,persona,instance_index,name,resolved_model,last_heartbeat_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  ['cmd-active-003','claude',JSON.stringify(['--no-color','--persona','testing']),null,12347,1,ago(3*MIN),null,S4,'claude','testing',3,'Testing Reviewer','claude-haiku-4-5',ago(15)])
+for (const [uid,persona,pid,name,model,hb] of [
+  ['cmd-active-001','security',12345,'Security Reviewer','claude-opus-4-5',ago(25)],
+  ['cmd-active-002','architect',12346,'Architect','claude-sonnet-4-5',ago(40)],
+  ['cmd-active-003','coder',12347,'Coder','claude-sonnet-4-5',ago(18)],
+  ['cmd-active-004','performance',12348,'Performance Reviewer','claude-haiku-4-5',ago(55)],
+  ['cmd-active-005','devil_advocate',12349,'Devil\'s Advocate','claude-opus-4-5',ago(8)],
+  ['cmd-active-006','testing',12350,'Testing Reviewer','claude-haiku-4-5',ago(32)],
+]) {
+  run(`INSERT INTO command_executions (uid,command,args,exit_code,pid,is_detached,started_at,finished_at,workflow_id,vendor,persona,instance_index,name,resolved_model,last_heartbeat_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    [uid,'claude',JSON.stringify(['--no-color','--persona',persona]),null,pid,1,ago(3*MIN),null,S4,'claude',persona,1,name,model,hb])
+}
 
-console.log('✓ Session 4: dashboard-realtime (active, reviews phase, 3 agents running)')
+console.log('✓ Session 4: dashboard-realtime (active, reviews phase, 6 agents running)')
 
 // ── Historic command executions ───────────────────────────────────────────────
 
 for (const [uid,sid,vendor,persona,idx,name,model,started,finished] of [
   ['cmd-hist-001',S1,'claude','security',1,'Security Reviewer','claude-opus-4-5',ago(3*DAY-10*MIN),ago(3*DAY-16*MIN)],
-  ['cmd-hist-002',S1,'claude','architecture',1,'Architecture Reviewer','claude-sonnet-4-5',ago(3*DAY-10*MIN),ago(3*DAY-17*MIN)],
+  ['cmd-hist-002',S1,'claude','architect',1,'Architect','claude-sonnet-4-5',ago(3*DAY-10*MIN),ago(3*DAY-17*MIN)],
   ['cmd-hist-003',S1,'claude','testing',1,'Testing Reviewer','claude-haiku-4-5',ago(3*DAY-10*MIN),ago(3*DAY-14*MIN)],
   ['cmd-hist-004',S1,'claude','performance',1,'Performance Reviewer','claude-haiku-4-5',ago(3*DAY-10*MIN),ago(3*DAY-13*MIN)],
+  ['cmd-hist-008',S1,'claude','coder',1,'Coder','claude-sonnet-4-5',ago(3*DAY-10*MIN),ago(3*DAY-15*MIN)],
+  ['cmd-hist-009',S1,'claude','devil_advocate',1,'Devil\'s Advocate','claude-opus-4-5',ago(3*DAY-10*MIN),ago(3*DAY-18*MIN)],
   ['cmd-hist-005',S2,'claude','architecture',1,'Architecture Reviewer','claude-sonnet-4-5',ago(1*DAY-12*MIN),ago(1*DAY-18*MIN)],
   ['cmd-hist-006',S2,'claude','performance',1,'Performance Reviewer','claude-haiku-4-5',ago(1*DAY-12*MIN),ago(1*DAY-16*MIN)],
   ['cmd-hist-007',S2,'claude','testing',1,'Testing Reviewer','claude-haiku-4-5',ago(1*DAY-12*MIN),ago(1*DAY-15*MIN)],

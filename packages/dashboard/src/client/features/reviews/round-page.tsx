@@ -6,11 +6,8 @@ import type { RoundTriage } from '../../lib/api-types'
 import { ReviewerCard } from './components/reviewer-card'
 import { FindingsTable } from './components/findings-table'
 import { VerdictBanner } from '../../components/markdown/verdict-banner'
-import {
-  DiscourseBlock,
-  parseDiscourseContent,
-} from '../../components/markdown/discourse-block'
 import { MarkdownRenderer } from '../../components/markdown/markdown-renderer'
+import { WarRoomPanel } from './components/war-room-panel'
 import { ChatPanel } from '../chat/components/chat-panel'
 import { PostReviewDialog } from './components/post-review-dialog'
 import { AddressFeedbackPopover } from './components/address-feedback-popover'
@@ -43,7 +40,6 @@ export function RoundPage() {
 
   const updateStatus = useUpdateRoundStatus()
 
-  const [showDiscourse, setShowDiscourse] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
   const [handoffOpen, setHandoffOpen] = useState(false)
 
@@ -194,32 +190,12 @@ export function RoundPage() {
         <FindingsTable findings={findings ?? []} isLoading={findingsLoading} />
       </div>
 
-      {/* Discourse Section */}
-      {discourseArtifact && (
-        <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-          <button
-            onClick={() => setShowDiscourse((v) => !v)}
-            className="flex items-center gap-2 text-sm font-medium text-zinc-900 transition-colors hover:text-zinc-700 dark:text-zinc-100 dark:hover:text-zinc-300"
-          >
-            <MessageSquare className="h-4 w-4" />
-            {showDiscourse ? 'Hide Discourse' : 'View Discourse'}
-          </button>
-          {showDiscourse && (
-            <div className="mt-4 space-y-4">
-              {discourseSections.length > 0
-                ? discourseSections.map((section, i) => (
-                    <DiscourseBlock
-                      key={i}
-                      type={section.type}
-                      content={section.content}
-                      reviewer={section.reviewer}
-                    />
-                  ))
-                : <MarkdownRenderer content={discourseArtifact.content} />
-              }
-            </div>
-          )}
-        </div>
+      {/* War Room — agent debate + vote tally */}
+      {round && (
+        <WarRoomPanel
+          round={round}
+          discourseContent={discourseArtifact?.content ?? null}
+        />
       )}
 
       {/* Final Review Content */}
