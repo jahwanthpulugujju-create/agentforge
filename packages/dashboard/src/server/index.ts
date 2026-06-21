@@ -15,7 +15,7 @@ import { randomBytes } from 'node:crypto'
 import { Server as SocketIOServer } from 'socket.io'
 
 import { resolveOcrDir } from './services/ocr-resolver.js'
-import { openDb, closeDb, getAllRounds, getReviewerOutputsForRound, getRoundProgress } from './db.js'
+import { openDb, closeDb, getAllRounds, getAllSessions, getReviewerOutputsForRound, getRoundProgress } from './db.js'
 import { registerSocketHandlers } from './socket/handlers.js'
 import { createSessionsRouter } from './routes/sessions.js'
 import { createReviewsRouter } from './routes/reviews.js'
@@ -490,8 +490,11 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
   // GET /api/reviews — all review rounds across sessions
   app.get('/api/reviews', (_req, res) => {
     try {
+      const sessions = getAllSessions(db)
+      const branchMap = new Map(sessions.map((s) => [s.id, s.branch]))
       const rounds = getAllRounds(db).map((r) => ({
         ...r,
+        branch: branchMap.get(r.session_id) ?? null,
         reviewer_outputs: getReviewerOutputsForRound(db, r.id),
         progress: getRoundProgress(db, r.id) ?? null,
       }))

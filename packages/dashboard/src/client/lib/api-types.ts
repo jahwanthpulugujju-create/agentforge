@@ -48,6 +48,7 @@ export type DashboardStats = {
 export type ReviewRound = {
   id: number
   session_id: string
+  branch?: string | null
   round_number: number
   verdict: string | null
   blocker_count: number

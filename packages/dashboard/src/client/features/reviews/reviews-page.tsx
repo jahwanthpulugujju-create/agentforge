@@ -234,7 +234,7 @@ export function ReviewsPage() {
                 </thead>
                 <tbody>
                   {sorted.map((round) => {
-                    const branch = round.session_id.replace(/^\d{4}-\d{2}-\d{2}-/, '')
+                    const branch = round.branch ?? round.session_id.replace(/^\d{4}-\d{2}-\d{2}-/, '')
                     const reviewerCount = (round.reviewer_outputs ?? []).length
 
                     return (
