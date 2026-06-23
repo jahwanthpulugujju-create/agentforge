@@ -105,8 +105,7 @@ export function DemoPanel({ hero = false }: DemoPanelProps) {
       <div className="flex items-center justify-between px-5 py-4"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg"
-            style={{ background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.2)' }}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg text-indigo-400 bg-indigo-400 border-[3px] border-amber-400">
             <Zap className="h-4 w-4" style={{ color: '#fbbf24' }} />
           </div>
           <div>
