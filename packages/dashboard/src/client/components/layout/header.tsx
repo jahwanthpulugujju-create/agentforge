@@ -59,7 +59,7 @@ export function Header() {
       </nav>
 
       <a
-        href="https://github.com/spencermarx/open-code-review"
+        href="https://github.com/jahwanthpulugujju-create/agentforge"
         target="_blank"
         rel="noopener noreferrer"
         className="flex h-7 w-7 items-center justify-center rounded-md transition-all"
