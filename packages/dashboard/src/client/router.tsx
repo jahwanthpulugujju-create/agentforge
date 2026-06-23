@@ -14,6 +14,7 @@ import { ReviewsPage } from './features/reviews/reviews-page'
 import { LoginPage } from './features/auth/login-page'
 import { RegisterPage } from './features/auth/register-page'
 import { ApiKeysPage } from './features/settings/api-keys-page'
+import { SettingsPage } from './features/settings/settings-page'
 import { ReviewJobsPage } from './features/jobs/review-jobs-page'
 
 function NotFoundPage() {
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: 'commands', element: withErrorBoundary(<CommandsPage />), errorElement: <RouteErrorFallback /> },
       { path: 'reviewers', element: withErrorBoundary(<ReviewersPage />), errorElement: <RouteErrorFallback /> },
       { path: 'jobs', element: protected_(<ReviewJobsPage />) },
+      { path: 'settings', element: withErrorBoundary(<SettingsPage />) },
       { path: 'settings/api-keys', element: protected_(<ApiKeysPage />) },
       { path: '*', element: <NotFoundPage /> },
     ],

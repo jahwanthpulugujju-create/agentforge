@@ -12,6 +12,7 @@ const NAV = [
   { to: '/reviewers', label: 'agents'    },
   { to: '/sessions',  label: 'sessions'  },
   { to: '/reviews',   label: 'findings'  },
+  { to: '/settings',  label: 'settings'  },
 ] as const
 
 const AUTH_NAV = [
