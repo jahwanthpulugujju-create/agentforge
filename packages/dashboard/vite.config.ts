@@ -63,6 +63,9 @@ function createFilteredLogger() {
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   customLogger: createFilteredLogger(),
+  resolve: {
+    dedupe: ['react', 'react-dom', 'three'],
+  },
   build: {
     outDir: 'dist/client',
     target: 'es2022',
