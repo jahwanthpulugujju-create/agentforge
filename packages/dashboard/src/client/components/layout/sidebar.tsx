@@ -1,60 +1,29 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  GitBranch,
-  FileSearch,
-  Swords,
-  Users,
-  Key,
-  Cpu,
-  LogOut,
-  ChevronDown,
-  Zap,
-  Shield,
-} from 'lucide-react'
+import { LogOut, Key, ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { OcrLogoIcon } from '../ocr-logo'
 import { useSocket } from '../../providers/socket-provider'
 import { useCommandState } from '../../providers/command-state-provider'
 import { useIdeConfig } from '../../hooks/use-ide-config'
 import { useAuthContext } from '../../hooks/use-auth'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Command Center', icon: LayoutDashboard },
-  { to: '/commands', label: 'War Room', icon: Swords },
-  { to: '/reviewers', label: 'Agents', icon: Users },
-  { to: '/sessions', label: 'Sessions', icon: GitBranch },
-  { to: '/reviews', label: 'Findings', icon: FileSearch },
+  { to: '/',          label: 'overview',  shortcut: 'G H' },
+  { to: '/commands',  label: 'war room',  shortcut: 'G W' },
+  { to: '/reviewers', label: 'agents',    shortcut: 'G A' },
+  { to: '/sessions',  label: 'sessions',  shortcut: 'G S' },
+  { to: '/reviews',   label: 'findings',  shortcut: 'G F' },
 ] as const
 
 const AUTH_NAV_ITEMS = [
-  { to: '/jobs', label: 'AI Reviews', icon: Cpu },
-  { to: '/settings/api-keys', label: 'API Keys', icon: Key },
+  { to: '/jobs',             label: 'ai reviews',  shortcut: '' },
+  { to: '/settings/api-keys', label: 'api keys',   shortcut: '' },
 ] as const
 
-const STATUS_COLORS: Record<string, string> = {
-  connected: '#00ff88',
-  connecting: '#f59e0b',
-  reconnecting: '#f59e0b',
-  disconnected: '#ff4060',
-}
-const STATUS_LABELS: Record<string, string> = {
-  connected: 'LIVE',
-  connecting: 'CONNECTING',
-  reconnecting: 'RECONNECTING',
-  disconnected: 'OFFLINE',
-}
-
-function NavLink({
-  to,
-  label,
-  icon: Icon,
-  badge,
-}: {
+function NavLink({ to, label, shortcut, badge }: {
   to: string
   label: string
-  icon: React.ElementType
+  shortcut: string
   badge?: number
 }) {
   const location = useLocation()
@@ -63,41 +32,33 @@ function NavLink({
   return (
     <Link
       to={to}
-      className={cn(
-        'group relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-medium transition-all duration-200',
-        active
-          ? 'text-white'
-          : 'text-slate-400 hover:text-slate-200',
-      )}
-      style={active ? {
-        background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.12) 0%, rgba(139, 92, 246, 0.06) 100%)',
-        borderLeft: '2px solid #00d4ff',
-        paddingLeft: '10px',
-        boxShadow: 'inset 0 0 16px rgba(0, 212, 255, 0.04)',
-      } : {}}
+      className="group flex items-center justify-between rounded px-2 py-1.5 transition-all"
+      style={{
+        background: active ? 'rgba(0,212,255,0.06)' : 'transparent',
+        color: active ? '#e2e8f0' : '#4a5568',
+      }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}
+      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = '#4a5568' }}
     >
-      {!active && (
-        <span
-          className="absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-          style={{ background: 'rgba(0, 212, 255, 0.04)' }}
-        />
-      )}
-      <Icon
-        className="h-3.5 w-3.5 shrink-0 transition-colors"
-        style={{ color: active ? '#00d4ff' : undefined }}
-      />
-      <span className="tracking-wide uppercase" style={{ fontSize: '10px', letterSpacing: '0.08em' }}>{label}</span>
-      {badge != null && badge > 0 && (
-        <span
-          className="ml-auto inline-flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold"
-          style={{
-            background: 'linear-gradient(135deg, #00d4ff, #8b5cf6)',
-            color: '#030712',
-          }}
-        >
-          {badge}
-        </span>
-      )}
+      <span className="font-mono text-xs">{label}</span>
+      <div className="flex items-center gap-1.5">
+        {badge != null && badge > 0 && (
+          <span
+            className="rounded px-1.5 py-0.5 font-mono text-[9px] font-bold"
+            style={{ background: 'rgba(0,212,255,0.15)', color: '#00d4ff' }}
+          >
+            {badge}
+          </span>
+        )}
+        {shortcut && (
+          <span
+            className="font-mono text-[9px] opacity-0 transition-opacity group-hover:opacity-100"
+            style={{ color: '#2d3748' }}
+          >
+            {shortcut}
+          </span>
+        )}
+      </div>
     </Link>
   )
 }
@@ -109,16 +70,19 @@ function UserWidget() {
 
   if (!user) {
     return (
-      <div className="border-t p-3" style={{ borderColor: 'rgba(0, 212, 255, 0.1)' }}>
+      <div className="mt-auto px-3 pb-3">
         <Link
           to="/login"
-          className="forge-btn-primary flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold tracking-widest uppercase transition-all"
+          className="block w-full rounded px-3 py-2 text-center font-mono text-xs font-medium transition-all"
           style={{
-            background: 'linear-gradient(135deg, #00d4ff, #0099cc)',
-            color: '#030712',
+            background: 'rgba(0,212,255,0.08)',
+            border: '1px solid rgba(0,212,255,0.15)',
+            color: '#00d4ff',
           }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.12)' }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.08)' }}
         >
-          Sign In
+          sign in →
         </Link>
       </div>
     )
@@ -134,29 +98,26 @@ function UserWidget() {
   }
 
   return (
-    <div className="relative border-t p-2" style={{ borderColor: 'rgba(0, 212, 255, 0.1)' }}>
+    <div className="relative border-t px-3 pb-3 pt-3" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-xs transition-all hover:bg-white/5"
+        className="flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left transition-all hover:bg-white/[0.03]"
       >
         <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold"
-          style={{
-            background: 'linear-gradient(135deg, #00d4ff, #8b5cf6)',
-            color: '#030712',
-          }}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm font-mono text-[10px] font-bold"
+          style={{ background: 'rgba(0,212,255,0.1)', color: '#00d4ff', border: '1px solid rgba(0,212,255,0.2)' }}
         >
           {initials}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium text-slate-200">{user.name || user.email}</p>
-          {user.name && (
-            <p className="truncate text-[10px]" style={{ color: '#4a5568' }}>{user.email}</p>
-          )}
+          <p className="truncate font-mono text-[11px]" style={{ color: '#94a3b8' }}>
+            {user.name || user.email}
+          </p>
+          <p className="font-mono text-[9px]" style={{ color: '#2d3748' }}>{user.plan}</p>
         </div>
         <ChevronDown
           className={cn('h-3 w-3 shrink-0 transition-transform', open && 'rotate-180')}
-          style={{ color: '#4a5568' }}
+          style={{ color: '#2d3748' }}
         />
       </button>
 
@@ -164,39 +125,30 @@ function UserWidget() {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
-            className="absolute bottom-full left-2 right-2 z-20 mb-1 rounded-xl border shadow-2xl"
-            style={{
-              background: 'linear-gradient(135deg, #0d1117, #0f1729)',
-              borderColor: 'rgba(0, 212, 255, 0.2)',
-            }}
+            className="absolute bottom-full left-2 right-2 z-20 mb-1 rounded-lg border shadow-2xl overflow-hidden"
+            style={{ background: '#0d1117', borderColor: 'rgba(255,255,255,0.08)' }}
           >
-            <div className="border-b px-3 py-2.5" style={{ borderColor: 'rgba(0, 212, 255, 0.1)' }}>
-              <p className="text-xs font-medium text-slate-200">{user.name || 'Account'}</p>
-              <p className="text-[10px]" style={{ color: '#4a5568' }}>{user.email}</p>
-              <span
-                className="mt-1.5 inline-block rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest"
-                style={{ background: 'rgba(0, 212, 255, 0.1)', color: '#00d4ff' }}
-              >
-                {user.plan}
-              </span>
+            <div className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <p className="font-mono text-xs" style={{ color: '#e2e8f0' }}>{user.email}</p>
+              <p className="font-mono text-[10px] mt-0.5" style={{ color: '#2d3748' }}>{user.plan} plan</p>
             </div>
             <div className="p-1">
               <Link
                 to="/settings/api-keys"
                 onClick={() => setOpen(false)}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs transition-all hover:bg-white/5"
-                style={{ color: '#64748b' }}
+                className="flex w-full items-center gap-2 rounded px-3 py-2 font-mono text-xs transition-all hover:bg-white/[0.04]"
+                style={{ color: '#4a5568' }}
               >
-                <Key className="h-3.5 w-3.5" />
-                API Keys
+                <Key className="h-3 w-3" />
+                api keys
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs transition-all hover:bg-red-950/20"
+                className="flex w-full items-center gap-2 rounded px-3 py-2 font-mono text-xs transition-all hover:bg-red-950/20"
                 style={{ color: '#ff4060' }}
               >
-                <LogOut className="h-3.5 w-3.5" />
-                Sign out
+                <LogOut className="h-3 w-3" />
+                sign out
               </button>
             </div>
           </div>
@@ -207,93 +159,95 @@ function UserWidget() {
 }
 
 export function Sidebar() {
-  const location = useLocation()
   const { status } = useSocket()
   const { runningCount } = useCommandState()
   const { data: config } = useIdeConfig()
   const { user } = useAuthContext()
 
   useEffect(() => {
-    if (config?.workspaceName) {
-      const branch = config.gitBranch ? ` (${config.gitBranch})` : ''
-      document.title = `${config.workspaceName}${branch} — AgentForge`
-    } else {
-      document.title = 'AgentForge'
-    }
-  }, [config?.workspaceName, config?.gitBranch])
+    document.title = config?.workspaceName
+      ? `${config.workspaceName} — AgentForge`
+      : 'AgentForge'
+  }, [config?.workspaceName])
 
-  const statusColor = STATUS_COLORS[status] ?? '#4a5568'
-  const statusLabel = STATUS_LABELS[status] ?? status.toUpperCase()
+  const isConnected = status === 'connected'
 
   return (
     <aside
-      className="relative flex h-full w-56 flex-col"
+      className="flex h-full w-52 flex-col"
       style={{
-        background: 'linear-gradient(180deg, #080d1a 0%, #060b16 100%)',
-        borderRight: '1px solid rgba(0, 212, 255, 0.1)',
+        background: '#060a12',
+        borderRight: '1px solid rgba(255,255,255,0.04)',
       }}
     >
+      {/* Brand */}
       <div
-        className="flex h-14 items-center gap-2.5 px-4"
-        style={{ borderBottom: '1px solid rgba(0, 212, 255, 0.1)' }}
+        className="px-4 py-4"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
       >
-        <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-          style={{ background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(139, 92, 246, 0.1))', border: '1px solid rgba(0, 212, 255, 0.3)' }}
-        >
-          <Zap className="h-3.5 w-3.5" style={{ color: '#00d4ff' }} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <span className="text-sm font-bold tracking-tight" style={{ color: '#e2e8f0' }}>
-            Agent<span style={{ color: '#00d4ff' }}>Forge</span>
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="font-mono text-sm font-bold" style={{ color: '#e2e8f0' }}>
+            agent<span style={{ color: '#00d4ff' }}>forge</span>
           </span>
-          {config?.workspaceName && (
-            <span className="block truncate text-[9px] uppercase tracking-widest" style={{ color: '#4a5568' }}>
-              {config.workspaceName}
-            </span>
-          )}
+          <span
+            className="rounded-sm px-1 py-px font-mono text-[8px] font-bold"
+            style={{ background: 'rgba(0,212,255,0.08)', color: '#00d4ff' }}
+          >
+            beta
+          </span>
         </div>
+        {config?.workspaceName ? (
+          <p className="font-mono text-[10px] truncate" style={{ color: '#2d3748' }}>
+            {config.workspaceName}
+            {config.gitBranch && <span style={{ color: '#1e293b' }}> · {config.gitBranch}</span>}
+          </p>
+        ) : (
+          <p className="font-mono text-[10px]" style={{ color: '#1e293b' }}>no workspace</p>
+        )}
       </div>
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto p-2 pt-3">
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-0.5">
+        {NAV_ITEMS.map(({ to, label, shortcut }) => (
           <NavLink
             key={to}
             to={to}
             label={label}
-            icon={Icon}
+            shortcut={shortcut}
             badge={to === '/commands' ? runningCount : undefined}
           />
         ))}
 
         {user && (
           <>
-            <div className="my-3 border-t" style={{ borderColor: 'rgba(0, 212, 255, 0.08)' }} />
-            {AUTH_NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-              <NavLink key={to} to={to} label={label} icon={Icon} />
+            <div className="my-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }} />
+            {AUTH_NAV_ITEMS.map(({ to, label, shortcut }) => (
+              <NavLink key={to} to={to} label={label} shortcut={shortcut} />
             ))}
           </>
         )}
       </nav>
 
+      {/* Status bar */}
       <div
         className="flex items-center justify-between px-4 py-2"
-        style={{ borderTop: '1px solid rgba(0, 212, 255, 0.08)' }}
+        style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
       >
         <div className="flex items-center gap-1.5">
           <div
             className="h-1.5 w-1.5 rounded-full"
             style={{
-              backgroundColor: statusColor,
-              boxShadow: `0 0 6px ${statusColor}`,
-              animation: status === 'connected' ? undefined : 'forge-pulse 1.5s infinite',
+              background: isConnected ? '#00ff88' : '#ff4060',
+              boxShadow: isConnected ? '0 0 6px rgba(0,255,136,0.7)' : 'none',
             }}
           />
-          <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: statusColor }}>
-            {statusLabel}
+          <span className="font-mono text-[10px]" style={{ color: isConnected ? '#00ff88' : '#ff4060' }}>
+            {isConnected ? 'connected' : status}
           </span>
         </div>
-        <Shield className="h-3 w-3" style={{ color: 'rgba(0, 212, 255, 0.3)' }} />
+        <span className="font-mono text-[9px]" style={{ color: '#1e293b' }}>
+          v1.8
+        </span>
       </div>
 
       <UserWidget />
