@@ -2,6 +2,7 @@ import { useState, Suspense, lazy } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/use-auth'
 import { Zap, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { NebulaBackground } from '../../components/three/NebulaBackground'
 
 const LoginOrb = lazy(() =>
   import('../../components/three/LoginOrb').then((m) => ({ default: m.LoginOrb }))
@@ -33,46 +34,22 @@ export function LoginPage() {
   return (
     <div
       className="relative min-h-screen flex overflow-hidden"
-      style={{ background: '#030712' }}
+      style={{ background: '#020408' }}
     >
-      {/* 3D grid */}
+      {/* Live nebula canvas */}
+      <NebulaBackground opacity={0.85} />
+
+      {/* Subtle vignette to focus attention toward center */}
       <div
-        className="pointer-events-none fixed inset-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-        }}
-      />
-      {/* Radial glow top */}
-      <div
-        className="pointer-events-none fixed inset-0"
+        className="pointer-events-none fixed inset-0 z-[1]"
         style={{
           background:
-            'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(0, 212, 255, 0.12) 0%, transparent 65%)',
-        }}
-      />
-      {/* Bottom-left violet glow */}
-      <div
-        className="pointer-events-none fixed inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 40% at 0% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 60%)',
+            'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, rgba(2,4,8,0.65) 100%)',
         }}
       />
 
       {/* Left — 3D Orb panel */}
-      <div className="relative hidden lg:flex lg:flex-1 items-center justify-center">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 212, 255, 0.07) 0%, transparent 70%)',
-          }}
-        />
-
+      <div className="relative z-10 hidden lg:flex lg:flex-1 items-center justify-center">
         <div style={{ width: 520, height: 520 }}>
           <Suspense fallback={null}>
             <LoginOrb />
@@ -95,7 +72,7 @@ export function LoginPage() {
                   style={{ background: color, boxShadow: `0 0 8px ${color}` }}
                 />
                 <span
-                  className="text-[9px] font-bold uppercase tracking-widest"
+                  className="text-[9px] font-mono"
                   style={{ color: 'rgba(74,85,104,0.7)' }}
                 >
                   {label}
@@ -104,7 +81,7 @@ export function LoginPage() {
             ))}
           </div>
           <p
-            className="mt-6 text-xs font-medium"
+            className="mt-6 text-xs font-medium font-mono"
             style={{
               background: 'linear-gradient(135deg, #00d4ff, #8b5cf6)',
               WebkitBackgroundClip: 'text',
@@ -120,24 +97,21 @@ export function LoginPage() {
       {/* Right — Auth panel */}
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-8 lg:max-w-lg">
         <div className="w-full max-w-md animate-forge-fade-in">
+
           {/* Logo */}
           <div className="mb-10 flex flex-col items-start">
             <div className="mb-5 flex items-center gap-3">
               <div
                 className="flex h-10 w-10 items-center justify-center rounded-xl"
                 style={{
-                  background:
-                    'linear-gradient(135deg, rgba(0,212,255,0.2), rgba(139,92,246,0.1))',
+                  background: 'linear-gradient(135deg, rgba(0,212,255,0.2), rgba(139,92,246,0.1))',
                   border: '1px solid rgba(0,212,255,0.35)',
                   boxShadow: '0 0 24px rgba(0,212,255,0.15)',
                 }}
               >
                 <Zap className="h-5 w-5" style={{ color: '#00d4ff' }} />
               </div>
-              <span
-                className="text-2xl font-black tracking-tight"
-                style={{ color: '#e2e8f0' }}
-              >
+              <span className="text-2xl font-black tracking-tight" style={{ color: '#e2e8f0' }}>
                 Agent
                 <span
                   style={{
@@ -151,10 +125,7 @@ export function LoginPage() {
                 </span>
               </span>
             </div>
-            <h1
-              className="text-3xl font-black leading-tight"
-              style={{ color: '#e2e8f0' }}
-            >
+            <h1 className="text-3xl font-black leading-tight" style={{ color: '#e2e8f0' }}>
               Welcome back,
               <br />
               <span
@@ -177,18 +148,16 @@ export function LoginPage() {
           <div
             className="rounded-2xl p-8"
             style={{
-              background:
-                'linear-gradient(135deg, rgba(15,23,41,0.95) 0%, rgba(10,16,30,0.98) 100%)',
-              border: '1px solid rgba(0,212,255,0.18)',
-              boxShadow:
-                '0 0 0 1px rgba(0,212,255,0.04), 0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,212,255,0.08)',
-              backdropFilter: 'blur(24px)',
+              background: 'linear-gradient(135deg, rgba(15,23,41,0.92) 0%, rgba(10,16,30,0.96) 100%)',
+              border: '1px solid rgba(0,212,255,0.14)',
+              boxShadow: '0 0 0 1px rgba(0,212,255,0.04), 0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(0,212,255,0.06)',
+              backdropFilter: 'blur(32px)',
             }}
           >
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label
-                  className="mb-2 block text-[10px] font-bold uppercase tracking-widest"
+                  className="mb-2 block font-mono text-[10px] uppercase tracking-widest"
                   style={{ color: '#4a5568' }}
                 >
                   Email
@@ -219,7 +188,7 @@ export function LoginPage() {
 
               <div>
                 <label
-                  className="mb-2 block text-[10px] font-bold uppercase tracking-widest"
+                  className="mb-2 block font-mono text-[10px] uppercase tracking-widest"
                   style={{ color: '#4a5568' }}
                 >
                   Password
@@ -253,11 +222,7 @@ export function LoginPage() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 transition-colors"
                     style={{ color: '#374151' }}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -292,10 +257,7 @@ export function LoginPage() {
                 {!loading && (
                   <span
                     className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
-                    }}
+                    style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 100%)' }}
                   />
                 )}
                 <span className="relative flex items-center justify-center gap-2">
@@ -312,26 +274,14 @@ export function LoginPage() {
             </form>
 
             <div className="mt-6 flex items-center gap-3">
-              <div
-                className="flex-1 h-px"
-                style={{ background: 'rgba(0,212,255,0.07)' }}
-              />
-              <span
-                className="text-[10px] uppercase tracking-widest"
-                style={{ color: '#2d3748' }}
-              >
+              <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.07)' }} />
+              <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#2d3748' }}>
                 or
               </span>
-              <div
-                className="flex-1 h-px"
-                style={{ background: 'rgba(0,212,255,0.07)' }}
-              />
+              <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.07)' }} />
             </div>
 
-            <p
-              className="mt-5 text-center text-xs"
-              style={{ color: '#374151' }}
-            >
+            <p className="mt-5 text-center text-xs" style={{ color: '#374151' }}>
               New to AgentForge?{' '}
               <Link
                 to="/register"
@@ -344,7 +294,7 @@ export function LoginPage() {
           </div>
 
           <p
-            className="mt-6 text-center text-[10px] uppercase tracking-widest"
+            className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest"
             style={{ color: 'rgba(74,85,104,0.4)' }}
           >
             6 agents · adversarial review · pre-commit assurance
