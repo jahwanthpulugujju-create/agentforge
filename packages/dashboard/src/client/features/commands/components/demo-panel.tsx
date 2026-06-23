@@ -263,7 +263,7 @@ function DemoBody({
         }}
       >
         <Zap className={`h-3.5 w-3.5 ${running ? '' : ''}`} />
-        {running ? 'Demo running — watch the tab below…' : 'Run Hackathon Demo'}
+        {running ? 'Demo running — watch the tab below…' : 'Run Demo'}
       </button>
     </div>
   )
