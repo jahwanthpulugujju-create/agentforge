@@ -31,37 +31,37 @@ export function LoginPage() {
     }
   }
 
-  const inputStyle = {
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.08)',
+  const inputBase: React.CSSProperties = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.02)',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: 8,
+    padding: '11px 14px',
+    fontSize: 14,
     color: '#e2e8f0',
     outline: 'none',
-    width: '100%',
-    borderRadius: 8,
-    padding: '12px 16px',
-    fontSize: 14,
-    transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
     fontFamily: 'inherit',
+    transition: 'border-color 0.15s, box-shadow 0.15s',
   }
 
   return (
-    <div className="relative min-h-screen flex overflow-hidden" style={{ background: '#07090f' }}>
-      <NebulaBackground opacity={0.7} />
+    <div className="relative min-h-screen flex overflow-hidden" style={{ background: '#030305' }}>
+      <NebulaBackground opacity={0.55} />
 
-      {/* Radial vignette toward edges */}
+      {/* Edge vignette — keeps corners very black */}
       <div className="pointer-events-none fixed inset-0 z-[1]"
-        style={{ background: 'radial-gradient(ellipse 85% 85% at 50% 50%, transparent 20%, rgba(7,9,15,0.7) 100%)' }} />
+        style={{ background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 25%, rgba(3,3,5,0.75) 100%)' }} />
 
       {/* Left — Orb */}
-      <div className="relative z-10 hidden lg:flex lg:flex-1 flex-col items-center justify-center gap-16">
-        <div style={{ width: 480, height: 480 }}>
+      <div className="relative z-10 hidden lg:flex lg:flex-1 flex-col items-center justify-center gap-14">
+        <div style={{ width: 460, height: 460 }}>
           <Suspense fallback={null}>
             <LoginOrb />
           </Suspense>
         </div>
 
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-6">
+        <div className="text-center space-y-3">
+          <div className="flex items-center justify-center gap-5">
             {[
               { color: '#38bdf8', label: 'Architect' },
               { color: '#34d399', label: 'Coder' },
@@ -71,42 +71,45 @@ export function LoginPage() {
               { color: '#f472b6', label: "Devil's Advocate" },
             ].map(({ color, label }) => (
               <div key={label} className="flex flex-col items-center gap-1.5">
-                <div className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-                <span className="font-mono text-[9px]" style={{ color: '#1e293b' }}>{label}</span>
+                <div className="h-1 w-1 rounded-full" style={{ background: color, opacity: 0.5 }} />
+                <span className="font-mono text-[8px] uppercase tracking-wider" style={{ color: '#111827' }}>
+                  {label}
+                </span>
               </div>
             ))}
           </div>
-          <p className="font-mono text-xs" style={{ color: '#1e293b' }}>
-            Six agents. One consensus. Zero compromises.
+          <p className="font-mono text-[10px]" style={{ color: '#0f172a' }}>
+            Six agents. One consensus.
           </p>
         </div>
       </div>
 
       {/* Right — Form */}
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-8 lg:max-w-[480px]">
-        <div className="w-full max-w-sm animate-forge-fade-in">
+      <div className="relative z-10 flex flex-1 items-center justify-center px-8 lg:max-w-[440px]">
+        <div className="w-full max-w-[320px] animate-forge-fade-in">
 
-          {/* Brand */}
-          <div className="mb-10">
-            <div className="font-mono text-base font-semibold mb-6" style={{ color: '#e2e8f0' }}>
-              agent<span style={{ color: '#38bdf8' }}>forge</span>
-            </div>
-            <h1 className="text-[2rem] font-bold leading-tight mb-2" style={{ color: '#f0f4f8', letterSpacing: '-0.025em' }}>
-              Welcome back.
-            </h1>
-            <p className="text-sm" style={{ color: '#334155' }}>Your squad is standing by.</p>
+          <div className="font-mono text-[13px] font-semibold mb-8" style={{ letterSpacing: '-0.02em' }}>
+            agent<span style={{ color: '#38bdf8' }}>forge</span>
           </div>
 
-          {/* Form panel */}
-          <div className="rounded-xl p-7"
+          <h1 className="text-[2.25rem] font-bold mb-1.5" style={{ color: '#f8fafc', letterSpacing: '-0.03em' }}>
+            Welcome back.
+          </h1>
+          <p className="text-sm mb-8" style={{ color: '#1f2937' }}>
+            Your squad is standing by.
+          </p>
+
+          {/* Panel */}
+          <div className="rounded-xl p-6"
             style={{
-              background: 'rgba(255,255,255,0.025)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(32px)',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              backdropFilter: 'blur(40px)',
             }}>
             <form onSubmit={handleSubmit} className="space-y-4">
+
               <div>
-                <label className="block font-mono text-[10px] mb-2 uppercase tracking-widest" style={{ color: '#334155' }}>
+                <label className="block font-mono text-[9px] uppercase tracking-widest mb-2" style={{ color: '#1f2937' }}>
                   Email
                 </label>
                 <input
@@ -114,21 +117,21 @@ export function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  style={inputStyle}
+                  placeholder="you@example.com"
+                  style={inputBase}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.03)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)'
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.02)'
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
                     e.currentTarget.style.boxShadow = 'none'
                   }}
-                  placeholder="you@example.com"
                 />
               </div>
 
               <div>
-                <label className="block font-mono text-[10px] mb-2 uppercase tracking-widest" style={{ color: '#334155' }}>
+                <label className="block font-mono text-[9px] uppercase tracking-widest mb-2" style={{ color: '#1f2937' }}>
                   Password
                 </label>
                 <div className="relative">
@@ -137,33 +140,31 @@ export function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    style={{ ...inputStyle, paddingRight: 44 }}
+                    placeholder="••••••••"
+                    style={{ ...inputBase, paddingRight: 40 }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.03)'
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)'
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.02)'
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
                       e.currentTarget.style.boxShadow = 'none'
                     }}
-                    placeholder="••••••••"
                   />
-                  <button
-                    type="button"
+                  <button type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 transition-colors"
-                    style={{ color: '#1e293b' }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#475569' }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#1e293b' }}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                    style={{ color: '#111827' }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#374151' }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#111827' }}>
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
               </div>
 
               {error && (
-                <div className="rounded-lg px-4 py-3 text-sm"
-                  style={{ background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.18)', color: '#f87171' }}>
+                <div className="rounded-lg px-3.5 py-2.5 text-[12.5px]"
+                  style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.14)', color: '#f87171' }}>
                   {error}
                 </div>
               )}
@@ -171,41 +172,24 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
-                style={{
-                  background: loading ? 'rgba(56,189,248,0.08)' : '#38bdf8',
-                  color: loading ? '#334155' : '#07090f',
-                  border: 'none',
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    (e.currentTarget as HTMLElement).style.background = '#7dd3fc'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!loading) {
-                    (e.currentTarget as HTMLElement).style.background = '#38bdf8'
-                  }
-                }}
+                className="w-full mt-1 flex items-center justify-center gap-2 rounded-lg py-3 text-[13.5px] font-semibold transition-all disabled:opacity-40"
+                style={{ background: '#f8fafc', color: '#030305', border: 'none' }}
+                onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.background = '#ffffff' }}
+                onMouseLeave={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.background = '#f8fafc' }}
               >
-                {loading ? 'Authenticating…' : (
-                  <>Enter the War Room <ArrowRight className="h-4 w-4" /></>
-                )}
+                {loading ? 'Authenticating…' : <> Enter the War Room <ArrowRight className="h-3.5 w-3.5" /></>}
               </button>
             </form>
-
-            <p className="mt-5 text-center text-xs" style={{ color: '#1e293b' }}>
-              No account?{' '}
-              <Link to="/register" className="transition-colors" style={{ color: '#38bdf8' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#7dd3fc' }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#38bdf8' }}>
-                Deploy your squad →
-              </Link>
-            </p>
           </div>
 
-          <p className="mt-6 text-center font-mono text-[9px] uppercase tracking-widest" style={{ color: '#0f1929' }}>
-            6 agents · adversarial review · consensus required
+          <p className="mt-5 text-center text-[11.5px]" style={{ color: '#111827' }}>
+            No account?{' '}
+            <Link to="/register"
+              style={{ color: '#1f2937' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#374151' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#1f2937' }}>
+              Deploy your squad →
+            </Link>
           </p>
         </div>
       </div>

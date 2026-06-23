@@ -5,52 +5,33 @@ import { RecentSessions } from './components/recent-sessions'
 import { fetchApi } from '../../lib/utils'
 import type { DashboardStats, SessionSummary } from '../../lib/api-types'
 
-/* ── Tiny inline widgets — each agent gets something genuinely different ────── */
-
-function CodeWidget() {
-  return (
-    <div className="rounded font-mono text-[10.5px] leading-[1.7] overflow-hidden"
-      style={{ background: 'rgba(0,0,0,0.3)', padding: '10px 12px' }}>
-      <div><span style={{ color: '#569cd6' }}>const</span><span style={{ color: '#9cdcfe' }}> handler</span> <span style={{ color: '#d4d4d4' }}>= async</span><span style={{ color: '#dcdcaa' }}>(req)</span> <span style={{ color: '#d4d4d4' }}>{'=>'} {'{'}</span></div>
-      <div><span style={{ color: '#d4d4d4' }}>  </span><span style={{ color: '#569cd6' }}>const</span><span style={{ color: '#9cdcfe' }}> data</span> <span style={{ color: '#d4d4d4' }}>= </span><span style={{ color: '#569cd6' }}>await</span> <span style={{ color: '#9cdcfe' }}>db</span><span style={{ color: '#d4d4d4' }}>.</span><span style={{ color: '#dcdcaa' }}>query</span><span style={{ color: '#d4d4d4' }}>(sql)</span></div>
-      <div style={{ color: '#6a9955' }}>  {'//'} ← no sanitization</div>
-      <div><span style={{ color: '#d4d4d4' }}>  </span><span style={{ color: '#c586c0' }}>return</span><span style={{ color: '#9cdcfe' }}> res</span><span style={{ color: '#d4d4d4' }}>.</span><span style={{ color: '#dcdcaa' }}>json</span><span style={{ color: '#d4d4d4' }}>(data)</span></div>
-      <div style={{ color: '#d4d4d4' }}>{'}'}</div>
-    </div>
-  )
-}
+/* ── Capability widgets — one per agent ─────────────────────────────────── */
 
 function ArchWidget() {
   const nodes = [
-    { id: 'Client', x: 12,  y: 8  },
-    { id: 'API',    x: 42,  y: 40 },
-    { id: 'DB',     x: 74,  y: 12 },
-    { id: 'Cache',  x: 74,  y: 62 },
-    { id: 'Queue',  x: 18,  y: 72 },
+    { id: 'Client',  x: 8,  y: 6  },
+    { id: 'Gateway', x: 40, y: 38 },
+    { id: 'Service', x: 72, y: 6  },
+    { id: 'Cache',   x: 72, y: 58 },
+    { id: 'Queue',   x: 14, y: 70 },
   ]
-  const edges = [
-    [0,1],[1,2],[1,3],[1,4]
-  ]
+  const edges = [[0,1],[1,2],[1,3],[1,4]]
   return (
-    <div className="relative" style={{ height: 80 }}>
+    <div className="relative" style={{ height: 78 }}>
       <svg className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
         {edges.map(([a,b],i) => {
           const n1 = nodes[a]; const n2 = nodes[b]
           return <line key={i}
-            x1={`${n1.x + 4}%`} y1={`${n1.y + 8}%`}
-            x2={`${n2.x + 4}%`} y2={`${n2.y + 8}%`}
-            stroke="rgba(56,189,248,0.2)" strokeWidth="1" strokeDasharray="3 3" />
+            x1={`${n1.x+3.5}%`} y1={`${n1.y+8}%`}
+            x2={`${n2.x+3.5}%`} y2={`${n2.y+8}%`}
+            stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
         })}
       </svg>
       {nodes.map(n => (
         <div key={n.id} className="absolute font-mono text-[9px] rounded px-1.5 py-0.5"
-          style={{
-            left: `${n.x}%`, top: `${n.y}%`,
-            background: 'rgba(56,189,248,0.07)',
-            border: '1px solid rgba(56,189,248,0.18)',
-            color: '#38bdf8',
-            transform: 'translateY(-50%)',
-          }}>
+          style={{ left: `${n.x}%`, top: `${n.y}%`,
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
+            color: 'rgba(255,255,255,0.4)', transform: 'translateY(-50%)' }}>
           {n.id}
         </div>
       ))}
@@ -58,22 +39,35 @@ function ArchWidget() {
   )
 }
 
+function CodeWidget() {
+  return (
+    <div className="rounded font-mono text-[10px] leading-[1.75] overflow-hidden"
+      style={{ background: 'rgba(0,0,0,0.4)', padding: '9px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div><span style={{ color: '#569cd6' }}>const</span><span style={{ color: '#9cdcfe' }}> query</span><span style={{ color: '#d4d4d4' }}> = </span><span style={{ color: '#ce9178' }}>`SELECT * FROM users`</span></div>
+      <div style={{ color: '#608b4e' }}>{'// ← no parameterization'}</div>
+      <div><span style={{ color: '#569cd6' }}>await</span><span style={{ color: '#d4d4d4' }}> db.</span><span style={{ color: '#dcdcaa' }}>query</span><span style={{ color: '#d4d4d4' }}>(query)</span></div>
+      <div style={{ color: '#f87171', fontSize: 9 }}>█ SQL injection risk</div>
+    </div>
+  )
+}
+
 function RiskWidget() {
   const score = 8.3
-  const w = (score / 10) * 100
   return (
-    <div className="space-y-3">
-      <div className="flex items-baseline justify-between">
-        <span className="font-mono text-3xl font-bold" style={{ color: '#f87171' }}>{score.toFixed(1)}</span>
-        <span className="font-mono text-[10px]" style={{ color: '#2d3748' }}>CVSS</span>
+    <div className="space-y-2.5">
+      <div className="flex items-baseline gap-2">
+        <span className="font-mono text-[2.25rem] font-bold leading-none" style={{ color: '#f8fafc' }}>
+          {score.toFixed(1)}
+        </span>
+        <span className="font-mono text-[9px]" style={{ color: '#1f2937' }}>CVSS / 10</span>
       </div>
-      <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
-        <div className="h-full rounded-full" style={{ width: `${w}%`, background: 'linear-gradient(90deg,#f87171,#fca5a5)' }} />
+      <div className="h-px w-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
+        <div className="h-px" style={{ width: `${score * 10}%`, background: '#f87171' }} />
       </div>
       <div className="flex flex-wrap gap-1">
-        {['SQLi','XSS','SSRF','Auth','Deps','Secrets'].map(v => (
-          <span key={v} className="rounded font-mono text-[9px] px-1.5 py-px"
-            style={{ background: 'rgba(248,113,113,0.07)', color: '#f87171', border: '1px solid rgba(248,113,113,0.15)' }}>
+        {['SQLi','XSS','SSRF','Auth bypass','Secrets'].map(v => (
+          <span key={v} className="rounded font-mono text-[8.5px] px-1.5 py-px"
+            style={{ background: 'rgba(248,113,113,0.06)', color: 'rgba(248,113,113,0.55)', border: '1px solid rgba(248,113,113,0.12)' }}>
             {v}
           </span>
         ))}
@@ -83,22 +77,22 @@ function RiskWidget() {
 }
 
 function PerfWidget() {
-  const bars = [44, 71, 36, 90, 58, 67, 28, 82]
+  const bars = [44, 71, 36, 90, 58, 67, 28, 82, 61, 77]
   return (
-    <div className="space-y-2">
-      <div className="flex items-end gap-1" style={{ height: 44 }}>
+    <div className="space-y-1.5">
+      <div className="flex items-end gap-0.5" style={{ height: 46 }}>
         {bars.map((h, i) => (
-          <div key={i} className="flex-1 rounded-sm transition-all" style={{
+          <div key={i} className="flex-1 rounded-sm" style={{
             height: `${h}%`,
-            background: h > 75
-              ? 'linear-gradient(to top,#34d399,rgba(52,211,153,0.4))'
+            background: h > 70
+              ? 'rgba(255,255,255,0.18)'
               : h > 45
-                ? 'linear-gradient(to top,#fbbf24,rgba(251,191,36,0.4))'
-                : 'linear-gradient(to top,#f87171,rgba(248,113,113,0.4))',
+                ? 'rgba(255,255,255,0.08)'
+                : 'rgba(255,255,255,0.04)',
           }} />
         ))}
       </div>
-      <div className="flex justify-between font-mono text-[9px]" style={{ color: '#2d3748' }}>
+      <div className="flex justify-between font-mono text-[8.5px]" style={{ color: '#1f2937' }}>
         <span>p50 · 38ms</span><span>p99 · 612ms</span>
       </div>
     </div>
@@ -107,9 +101,9 @@ function PerfWidget() {
 
 function ReviewWidget() {
   const items = [
-    { done: true,  text: 'Strict type safety' },
-    { done: true,  text: 'Error boundary coverage' },
-    { done: false, text: 'Unit test coverage ≥ 80%' },
+    { done: true,  text: 'Type safety enforced' },
+    { done: true,  text: 'Error boundaries present' },
+    { done: false, text: 'Test coverage ≥ 80%' },
     { done: false, text: 'Public APIs documented' },
     { done: true,  text: 'No debug output in prod' },
   ]
@@ -117,14 +111,14 @@ function ReviewWidget() {
     <div className="space-y-1.5">
       {items.map(({ done, text }) => (
         <div key={text} className="flex items-center gap-2">
-          <div className="h-3 w-3 shrink-0 rounded-sm flex items-center justify-center"
+          <div className="h-2.5 w-2.5 shrink-0 rounded-sm flex items-center justify-center"
             style={{
-              background: done ? 'rgba(167,139,250,0.1)' : 'transparent',
-              border: `1px solid ${done ? 'rgba(167,139,250,0.35)' : 'rgba(255,255,255,0.07)'}`,
+              background: done ? 'rgba(255,255,255,0.06)' : 'transparent',
+              border: `1px solid ${done ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.05)'}`,
             }}>
-            {done && <svg viewBox="0 0 10 10" className="h-2 w-2"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            {done && <svg viewBox="0 0 10 10" className="h-1.5 w-1.5"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
-          <span className="text-[10px]" style={{ color: done ? '#475569' : '#1e293b', textDecoration: done ? 'none' : 'line-through' }}>
+          <span className="text-[10px]" style={{ color: done ? '#374151' : '#111827' }}>
             {text}
           </span>
         </div>
@@ -135,32 +129,33 @@ function ReviewWidget() {
 
 function DevilWidget() {
   return (
-    <div className="rounded space-y-2" style={{ background: 'rgba(244,114,182,0.05)', padding: '10px 12px', border: '1px solid rgba(244,114,182,0.1)' }}>
-      <p className="text-[22px] leading-none" style={{ color: 'rgba(244,114,182,0.25)' }}>"</p>
-      <p className="text-[11px] italic leading-relaxed" style={{ color: '#374151' }}>
-        Why REST? gRPC reduces latency by 40% and gives you a typed contract for free.
+    <div className="space-y-2" style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.05)' }}>
+      <p className="text-[1.75rem] leading-none" style={{ color: 'rgba(255,255,255,0.07)' }}>"</p>
+      <p className="text-[11px] italic leading-relaxed" style={{ color: '#1f2937' }}>
+        Why REST when gRPC cuts latency by 40% and gives you a typed contract for free?
       </p>
     </div>
   )
 }
 
 const AGENTS = [
-  { idx: '01', name: 'Architect',        handle: 'The Visionary',    color: '#38bdf8', tech: 'Gemini 1.5 Pro', tagline: 'Designs system topology and API contracts before implementation begins.', widget: <ArchWidget /> },
-  { idx: '02', name: 'Coder',            handle: 'The Builder',      color: '#34d399', tech: 'Claude 3.5',     tagline: 'Implements and iterates until Security and Performance sign off.',        widget: <CodeWidget /> },
-  { idx: '03', name: 'Security',         handle: 'The Paranoid',     color: '#f87171', tech: 'CodeLlama 13B',  tagline: 'Attacks every input vector, route, and dependency with OWASP Top 10.',   widget: <RiskWidget /> },
-  { idx: '04', name: 'Performance',      handle: 'The Speed Demon',  color: '#fbbf24', tech: 'Claude 3.5',     tagline: 'Benchmarks every hot path. bcrypt at 12 rounds = 300ms. Drop to 10.',    widget: <PerfWidget /> },
-  { idx: '05', name: 'Reviewer',         handle: 'The Perfectionist',color: '#a78bfa', tech: 'Gemini 1.5 Pro', tagline: 'Style, coverage, docs. Nothing ships without a complete tick list.',       widget: <ReviewWidget /> },
-  { idx: '06', name: "Devil's Advocate", handle: 'The Skeptic',      color: '#f472b6', tech: 'Claude 3.5',     tagline: 'Challenges the approach itself. The one who asks why at every turn.',      widget: <DevilWidget /> },
+  { idx: '01', name: 'Architect',          handle: 'The Visionary',     color: '#38bdf8', tech: 'Gemini 1.5 Pro',  tagline: 'Designs topology and API contracts before a single line ships.',         widget: <ArchWidget /> },
+  { idx: '02', name: 'Coder',              handle: 'The Builder',        color: '#34d399', tech: 'Claude 3.5',      tagline: 'Iterates until Security and Performance both sign off.',                  widget: <CodeWidget /> },
+  { idx: '03', name: 'Security',           handle: 'The Paranoid',       color: '#f87171', tech: 'CodeLlama 13B',   tagline: 'Attacks every vector, route, and dependency with OWASP Top 10.',         widget: <RiskWidget /> },
+  { idx: '04', name: 'Performance',        handle: 'The Speed Demon',    color: '#fbbf24', tech: 'Claude 3.5',      tagline: 'Benchmarks every hot path. bcrypt @ rounds=12 is 300ms. Drop it.',        widget: <PerfWidget /> },
+  { idx: '05', name: 'Reviewer',           handle: 'The Perfectionist',  color: '#a78bfa', tech: 'Gemini 1.5 Pro',  tagline: 'Style, coverage, documentation. Nothing merges with a red checkbox.',       widget: <ReviewWidget /> },
+  { idx: '06', name: "Devil's Advocate",   handle: 'The Skeptic',        color: '#f472b6', tech: 'Claude 3.5',      tagline: 'Challenges the approach itself. Always asks why.',                         widget: <DevilWidget /> },
 ]
 
 const LOOP_STEPS = [
+  'Architect designs the system and API surface',
   'Coder writes the first implementation',
-  'Security attacks it with OWASP Top 10',
+  'Security runs OWASP Top 10 and dep audit',
   'Performance benchmarks every hot path',
-  'Reviewer checks coverage and style',
-  "Devil's Advocate challenges the design",
-  'Vote — if blocked, return to step 1',
-  'Consensus reached → PR generated',
+  'Reviewer checks coverage, style, and docs',
+  "Devil's Advocate challenges the fundamental approach",
+  'Vote — blocked means return to step 1',
+  'Consensus → PR generated automatically',
 ]
 
 export function HomePage() {
@@ -175,47 +170,55 @@ export function HomePage() {
   const s = statsQ.data
 
   return (
-    <div className="max-w-5xl space-y-20 pb-16">
+    <div className="max-w-5xl space-y-20 pb-20">
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="pt-4 space-y-8">
-        <p className="font-mono text-xs" style={{ color: '#1e293b' }}>
-          agentforge / dashboard
+      <section className="pt-6 space-y-8">
+        <p className="font-mono text-[11px]" style={{ color: '#111827' }}>
+          agentforge / overview
         </p>
 
         <div>
-          <h1 className="text-[3.6rem] font-bold leading-[1.04] tracking-tight" style={{ color: '#f0f4f8', letterSpacing: '-0.025em' }}>
+          <h1 className="text-[3.75rem] font-bold leading-[1.02]"
+            style={{ color: '#f8fafc', letterSpacing: '-0.03em' }}>
             Code review,<br />
-            <span style={{ color: '#38bdf8' }}>done by committee.</span>
+            done by committee.
           </h1>
-          <p className="mt-5 text-[1.0625rem] leading-relaxed max-w-md" style={{ color: '#374151' }}>
-            Six agents debate every line before it merges. One writes it.
+          <p className="mt-5 text-base leading-relaxed max-w-[38ch]" style={{ color: '#1f2937' }}>
+            Six agents argue about your code before it ships. One writes it.
             One breaks it. One questions whether it should exist at all.
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center gap-0 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* Stats — monumental numbers on black */}
+        <div className="flex items-stretch pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           {[
-            { n: s?.totalSessions ?? '—',      l: 'sessions' },
-            { n: s?.completedReviews ?? '—',   l: 'reviews' },
-            { n: s?.unresolvedBlockers ?? '—', l: 'blockers' },
-            { n: s?.filesTracked ?? '—',       l: 'files tracked' },
+            { n: s?.totalSessions    ?? '—', l: 'sessions'     },
+            { n: s?.completedReviews ?? '—', l: 'reviews done' },
+            { n: s?.unresolvedBlockers ?? '—', l: 'blockers'   },
+            { n: s?.filesTracked     ?? '—', l: 'files'        },
           ].map(({ n, l }, i) => (
-            <div key={l} className="flex-1 pt-6">
-              {i > 0 && <div className="absolute inset-y-0 left-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.05)' }} />}
-              <div className="relative pl-6 first:pl-0">
-                <div className="text-[2.75rem] font-bold font-mono leading-none" style={{ color: '#e2e8f0', letterSpacing: '-0.03em' }}>
+            <div key={l} className="flex-1 relative">
+              {i > 0 && (
+                <div className="absolute left-0 top-0 bottom-0 w-px"
+                  style={{ background: 'rgba(255,255,255,0.05)' }} />
+              )}
+              <div className={`${i > 0 ? 'pl-8' : ''}`}>
+                <div className="text-[3.25rem] font-bold font-mono leading-none tracking-tight"
+                  style={{ color: '#f8fafc' }}>
                   {n}
                 </div>
-                <div className="font-mono text-[10px] mt-1.5" style={{ color: '#2d3748' }}>{l}</div>
+                <div className="font-mono text-[9px] mt-2 uppercase tracking-widest" style={{ color: '#111827' }}>
+                  {l}
+                </div>
               </div>
             </div>
           ))}
-
-          <div className="flex items-center gap-2 pl-8">
-            <div className="h-1.5 w-1.5 rounded-full animate-forge-pulse" style={{ background: '#34d399' }} />
-            <span className="font-mono text-[11px]" style={{ color: '#34d399' }}>live</span>
+          <div className="flex items-start pt-1 pl-8">
+            <div className="flex items-center gap-1.5">
+              <div className="h-1.5 w-1.5 rounded-full animate-forge-pulse" style={{ background: '#34d399' }} />
+              <span className="font-mono text-[10px]" style={{ color: '#34d399' }}>live</span>
+            </div>
           </div>
         </div>
       </section>
@@ -223,52 +226,44 @@ export function HomePage() {
       {/* ── Agent grid ────────────────────────────────────────────────────── */}
       <section>
         <div className="flex items-baseline justify-between mb-8">
-          <h2 className="text-xl font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+          <h2 className="text-lg font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
             The Six
           </h2>
-          <span className="font-mono text-[11px]" style={{ color: '#1e293b' }}>adversarial loop · consensus required</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#111827' }}>
+            adversarial · consensus required
+          </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-px" style={{ background: 'rgba(255,255,255,0.05)' }}>
           {AGENTS.map((a) => (
-            <div
-              key={a.idx}
-              className="relative rounded-lg flex flex-col"
-              style={{
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                backdropFilter: 'blur(12px)',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Color accent bar — agent's ONLY color usage */}
-              <div className="h-[2px] w-full" style={{ background: a.color, opacity: 0.8 }} />
+            <div key={a.idx} className="flex flex-col"
+              style={{ background: '#030305' }}>
+              {/* Agent color — 2px accent strip, the ONLY color on the card */}
+              <div style={{ height: 2, background: a.color, opacity: 0.7 }} />
 
-              <div className="p-5 flex flex-col flex-1 gap-4">
-                {/* Identity */}
+              <div className="flex flex-col flex-1 gap-4 p-5">
                 <div>
-                  <div className="flex items-baseline justify-between mb-1">
-                    <span className="text-base font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+                  <div className="flex items-baseline justify-between mb-1.5">
+                    <span className="text-[15px] font-semibold" style={{ color: '#e2e8f0' }}>
                       {a.name}
                     </span>
-                    <span className="font-mono text-[9px]" style={{ color: a.color, opacity: 0.7 }}>
+                    <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.1)' }}>
                       {a.idx}
                     </span>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: '#334155' }}>
+                  <p className="text-[11px] leading-relaxed" style={{ color: '#1f2937' }}>
                     {a.tagline}
                   </p>
                 </div>
 
-                {/* Widget */}
                 <div className="flex-1">{a.widget}</div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span className="font-mono text-[9px]" style={{ color: '#1e293b' }}>{a.tech}</span>
+                <div className="flex items-center justify-between"
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 10 }}>
+                  <span className="font-mono text-[8.5px]" style={{ color: '#111827' }}>{a.tech}</span>
                   <div className="flex items-center gap-1.5">
-                    <div className="h-1 w-1 rounded-full" style={{ background: '#1e293b' }} />
-                    <span className="font-mono text-[9px]" style={{ color: '#1e293b' }}>standby</span>
+                    <div className="h-1 w-1 rounded-full" style={{ background: '#1f2937' }} />
+                    <span className="font-mono text-[8.5px]" style={{ color: '#111827' }}>standby</span>
                   </div>
                 </div>
               </div>
@@ -278,27 +273,29 @@ export function HomePage() {
       </section>
 
       {/* ── Loop + Recent ─────────────────────────────────────────────────── */}
-      <section className="grid grid-cols-2 gap-12">
-        {/* Loop */}
+      <section className="grid grid-cols-2 gap-16">
+
+        {/* Adversarial loop */}
         <div>
-          <h2 className="text-xl font-semibold mb-6" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
             The adversarial loop
           </h2>
-          <p className="text-sm leading-relaxed mb-8" style={{ color: '#334155' }}>
-            Agents vote. If Security and Performance both reject, the code
-            returns to the Architect. No single agent can unblock a bad PR.
+          <p className="text-[13px] leading-relaxed mb-8" style={{ color: '#1f2937' }}>
+            Agents vote. Both Security and Performance must approve. No single
+            agent can unblock a bad PR.
           </p>
+
           <ol className="space-y-0">
             {LOOP_STEPS.map((step, i) => (
-              <li
-                key={i}
-                className="flex gap-4 py-3"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-              >
-                <span className="font-mono text-[10px] mt-[3px] shrink-0" style={{ color: '#1e293b' }}>
+              <li key={i} className="flex gap-4 py-3"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <span className="font-mono text-[9px] shrink-0 mt-[3px]"
+                  style={{ color: 'rgba(255,255,255,0.08)' }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="text-[13px] leading-snug" style={{ color: '#475569' }}>{step}</span>
+                <span className="text-[12.5px] leading-snug" style={{ color: '#374151' }}>
+                  {step}
+                </span>
               </li>
             ))}
           </ol>
@@ -306,20 +303,20 @@ export function HomePage() {
 
         {/* Recent sessions */}
         <div>
-          <div className="flex items-baseline justify-between mb-6">
-            <h2 className="text-xl font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="text-lg font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
               Recent
             </h2>
-            <Link
-              to="/sessions"
-              className="flex items-center gap-1 text-xs transition-colors hover:text-white"
-              style={{ color: '#2d3748' }}
-            >
-              all <ArrowUpRight className="h-3 w-3" />
+            <Link to="/sessions"
+              className="flex items-center gap-1 text-[11px] transition-colors"
+              style={{ color: '#1f2937' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#6b7280' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#1f2937' }}>
+              all sessions <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
           {sessionsQ.isLoading ? (
-            <p className="font-mono text-xs" style={{ color: '#1e293b' }}>loading…</p>
+            <p className="font-mono text-[11px]" style={{ color: '#111827' }}>loading…</p>
           ) : (
             <RecentSessions sessions={sessionsQ.data ?? []} />
           )}
@@ -327,9 +324,9 @@ export function HomePage() {
       </section>
 
       {(statsQ.isError || sessionsQ.isError) && (
-        <div className="rounded-lg p-4 font-mono text-sm"
-          style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', color: '#f87171' }}>
-          Server unreachable — check that the backend is running.
+        <div className="rounded p-4 font-mono text-[12px]"
+          style={{ background: 'rgba(248,113,113,0.04)', border: '1px solid rgba(248,113,113,0.12)', color: '#f87171' }}>
+          Server unreachable — check the backend is running.
         </div>
       )}
     </div>

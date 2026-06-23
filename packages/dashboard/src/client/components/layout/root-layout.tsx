@@ -5,8 +5,8 @@ import { NebulaBackground } from '../three/NebulaBackground'
 
 export function RootLayout() {
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#020408' }}>
-      <NebulaBackground opacity={0.72} />
+    <div className="flex h-screen overflow-hidden" style={{ background: '#030305' }}>
+      <NebulaBackground opacity={0.45} />
 
       <div className="relative z-10 flex h-full">
         <Sidebar />
