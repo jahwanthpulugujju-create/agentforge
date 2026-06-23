@@ -351,7 +351,7 @@ for (const [i, row] of findings1Rows.entries()) {
   run(`INSERT OR IGNORE INTO user_finding_progress (finding_id,status,updated_at) VALUES (?,?,?)`,[row.id,status,ago(2*DAY)])
 }
 
-console.log('✓ Session 1: auth-refactor (changes requested, 2 blockers)')
+console.log('✓ Session 1: auth-refactor (changes requested, 3 blockers, 6 agents)')
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SESSION 2 — api-pagination — APPROVED (1 day ago)
@@ -685,9 +685,9 @@ run(`INSERT INTO user_notes (target_type,target_id,content,created_at,updated_at
 console.log('✓ Historic command executions added')
 console.log('\n✅ Demo data seeded successfully!')
 console.log('   Sessions:  4 (3 closed, 1 active)')
-console.log('   Reviews:   2 rounds (1 changes requested w/ 2 blockers, 1 approved)')
+console.log('   Reviews:   2 rounds (1 changes requested w/ 3 blockers, 6 agents, 1 approved)')
 console.log('   Map:       1 run — 5 sections, 15 files, Mermaid diagrams')
 console.log('   Findings:  14 total (2 critical blockers)')
-console.log('   Agents:    3 currently "running" on session 4')
+console.log('   Agents:    6 currently "running" on session 4')
 
 db.close()

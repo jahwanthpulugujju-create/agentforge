@@ -62,10 +62,6 @@ export function RoundPage() {
     )
   }
 
-  const discourseSections = discourseArtifact
-    ? parseDiscourseContent(discourseArtifact.content)
-    : []
-
   return (
     <div className="space-y-6">
       <Link
