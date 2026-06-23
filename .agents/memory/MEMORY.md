@@ -1,0 +1,3 @@
+- [Port config](port-config.md) — API server uses SERVER_PORT (default 3001); Vite takes 5000 (external). Never put both on same port.
+- [Crypto in Node 22](node22-crypto.md) — createCipher/createDecipher removed in Node 22; must use createCipheriv/createDecipheriv with randomBytes(16) IV.
+- [Production stack](production-stack.md) — OCR now has PostgreSQL (migrations), JWT auth, direct AI API (Anthropic+OpenAI SDKs), PG-backed job queue, WebSocket presence. Key new files are in packages/dashboard/src/server/{config,middleware,routes,services/ai-api,services/queue,socket}.

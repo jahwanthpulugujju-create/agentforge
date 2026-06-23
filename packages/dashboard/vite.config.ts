@@ -26,7 +26,7 @@ function resolveServerPort(): number {
     dir = parent
   }
 
-  return 4173
+  return 3001
 }
 
 const serverPort = resolveServerPort()

@@ -59,6 +59,15 @@ import { reconcileCompletedSessions } from '@open-code-review/persistence/state'
 
 import { homedir } from 'node:os'
 
+// ── Production infrastructure ──
+import { initPostgres, closePostgres, isPostgresAvailable } from './db-postgres.js'
+import { createAuthRouter } from './routes/auth.js'
+import { createApiKeysRouter } from './routes/api-keys.js'
+import { createJobsRouter } from './routes/jobs.js'
+import { registerPresenceHandlers, getOnlineUserCount, getTotalConnections } from './socket/presence.js'
+import { startWorker, stopWorker } from './services/queue/review-queue.js'
+import { verifySocketToken } from './middleware/auth.js'
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /** Shorten an absolute path for display (replace homedir with ~). */
@@ -114,8 +123,21 @@ if (process.env.NODE_ENV !== 'production') {
 
 // ── Health check (available without auth, before DB init) ──
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' })
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    postgres: isPostgresAvailable(),
+    connections: getTotalConnections(),
+    online_users: getOnlineUserCount(),
+    version: process.env.npm_package_version ?? '1.0.0',
+  })
 })
+
+// ── Production auth routes (public — BEFORE bearer token middleware) ──
+app.use('/api/auth', createAuthRouter())
+app.use('/api/keys', createApiKeysRouter())
+app.use('/api/jobs', createJobsRouter())
 
 // ── Bearer token middleware for /api/* routes ──
 app.use('/api', (req, res, next) => {
@@ -198,14 +220,14 @@ function isOcrDashboardProcess(pid: number): boolean {
 }
 
 export async function startServer(options: StartServerOptions = {}): Promise<void> {
-  const port = options.port ?? parseInt(process.env.PORT ?? '4173', 10)
+  const port = options.port ?? parseInt(process.env.SERVER_PORT ?? '3001', 10)
 
-  // Stamp a stable, positively-identifying process title so a later instance's
-  // single-instance takeover can recognize THIS server (and never mistake a
-  // recycled PID for it). `isOcrDashboardProcess` anchors on this. On Linux it
-  // rewrites argv[0] (visible in `ps`); on macOS it may not reach `ps`, which is
-  // why the identity check keeps an entrypoint-path fallback.
   process.title = 'ocr-dashboard'
+
+  // ── PostgreSQL init (non-blocking — features degrade gracefully without it) ──
+  await initPostgres().catch((err) => {
+    console.error('  PostgreSQL init error:', err)
+  })
 
   // Resolve .ocr directory
   const ocrDir = resolveOcrDir()
@@ -559,10 +581,18 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
     })
   }
 
+  // ── Job queue worker ──
+  startWorker(io)
+
   // ── Socket.IO ──
 
   io.on('connection', (socket) => {
+    // Decode JWT from handshake for presence tracking (optional auth)
+    const jwtToken = socket.handshake.auth?.jwt as string | undefined
+    const jwtUser = jwtToken ? verifySocketToken(jwtToken) : null
+
     registerSocketHandlers(io, socket)
+    registerPresenceHandlers(io, socket, jwtUser)
     registerCommandHandlers(io, socket, db, ocrDir, aiCliService, sessionCapture)
     registerChatHandlers(io, socket, db, ocrDir, aiCliService)
     registerPostHandlers(io, socket, db, ocrDir, aiCliService)
@@ -618,7 +648,7 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
         const onError = (err: Error) => reject(err)
         httpServer.once('error', onError)
 
-        httpServer.listen(actualPort, '127.0.0.1', () => {
+        httpServer.listen(actualPort, '0.0.0.0', () => {
           httpServer.removeListener('error', onError)
           resolve()
         })
@@ -737,17 +767,15 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
     cleanupAllChats()
     cleanupAllPostGenerations()
 
+    stopWorker()
     dbSyncWatcher.stopWatching()
     fsSync.stopWatching()
     stopReviewersWatch()
     io.close()
-    // Without this, keep-alive connections from the Vite dev proxy
-    // (long-lived `/socket.io` upgrades, /api keep-alives) hold the
-    // server open indefinitely; httpServer.close()'s callback never
-    // fires and tsx watch force-kills before our cleanup completes.
     httpServer.closeAllConnections()
     httpServer.close(() => {
       closeDb()
+      void closePostgres()
       console.log('Server stopped.')
       process.exit(0)
     })

@@ -10,6 +10,10 @@ import { MapRunPage } from './features/map/map-run-page'
 import { RoundPage } from './features/reviews/round-page'
 import { ReviewerDetailPage } from './features/reviews/reviewer-detail-page'
 import { ReviewsPage } from './features/reviews/reviews-page'
+import { LoginPage } from './features/auth/login-page'
+import { RegisterPage } from './features/auth/register-page'
+import { ApiKeysPage } from './features/settings/api-keys-page'
+import { ReviewJobsPage } from './features/jobs/review-jobs-page'
 
 function NotFoundPage() {
   return (
@@ -27,6 +31,8 @@ function withErrorBoundary(element: React.ReactNode) {
 }
 
 export const router = createBrowserRouter([
+  { path: 'login', element: <LoginPage /> },
+  { path: 'register', element: <RegisterPage /> },
   {
     element: <RootLayout />,
     errorElement: <RouteErrorFallback />,
@@ -44,6 +50,8 @@ export const router = createBrowserRouter([
       { path: 'reviews', element: withErrorBoundary(<ReviewsPage />), errorElement: <RouteErrorFallback /> },
       { path: 'commands', element: withErrorBoundary(<CommandsPage />), errorElement: <RouteErrorFallback /> },
       { path: 'reviewers', element: withErrorBoundary(<ReviewersPage />), errorElement: <RouteErrorFallback /> },
+      { path: 'jobs', element: withErrorBoundary(<ReviewJobsPage />) },
+      { path: 'settings/api-keys', element: withErrorBoundary(<ApiKeysPage />) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
