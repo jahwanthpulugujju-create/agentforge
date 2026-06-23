@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Sun, Moon, Monitor, Github } from 'lucide-react'
+import { Sun, Moon, Monitor, Github, ChevronRight } from 'lucide-react'
 import { useTheme } from '../../providers/theme-provider'
 import { cn } from '../../lib/utils'
 
@@ -10,15 +10,27 @@ const THEME_ICONS = {
 } as const
 
 function buildBreadcrumbs(pathname: string): { label: string; path: string }[] {
-  if (pathname === '/') return [{ label: 'Home', path: '/' }]
+  const labels: Record<string, string> = {
+    '': 'Command Center',
+    commands: 'War Room',
+    reviewers: 'Agents',
+    sessions: 'Sessions',
+    reviews: 'Findings',
+    jobs: 'AI Reviews',
+    settings: 'Settings',
+    'api-keys': 'API Keys',
+    maps: 'Map Run',
+  }
+
+  if (pathname === '/') return [{ label: 'Command Center', path: '/' }]
 
   const parts = pathname.split('/').filter(Boolean)
-  const crumbs = [{ label: 'Home', path: '/' }]
+  const crumbs = [{ label: 'Command Center', path: '/' }]
 
   let accumulated = ''
   for (const part of parts) {
     accumulated += `/${part}`
-    const label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')
+    const label = labels[part] ?? (part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '))
     crumbs.push({ label, path: accumulated })
   }
 
@@ -33,25 +45,33 @@ export function Header() {
   const ThemeIcon = THEME_ICONS[mode]
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-zinc-200 px-6 dark:border-zinc-800">
-      <nav className="flex items-center gap-1 text-sm" aria-label="Breadcrumb">
+    <header
+      className="flex h-14 items-center justify-between px-6"
+      style={{
+        background: 'rgba(6, 11, 22, 0.8)',
+        borderBottom: '1px solid rgba(0, 212, 255, 0.08)',
+        backdropFilter: 'blur(12px)',
+      }}
+    >
+      <nav className="flex items-center gap-1" aria-label="Breadcrumb">
         {breadcrumbs.map((crumb, i) => (
           <span key={crumb.path} className="flex items-center gap-1">
             {i > 0 && (
-              <span className="text-zinc-400 dark:text-zinc-600">/</span>
+              <ChevronRight className="h-3 w-3" style={{ color: 'rgba(0, 212, 255, 0.3)' }} />
             )}
             {i < breadcrumbs.length - 1 ? (
               <Link
                 to={crumb.path}
-                className={cn(
-                  'text-zinc-500 dark:text-zinc-400',
-                  'hover:text-zinc-700 dark:hover:text-zinc-200',
-                )}
+                className="text-[10px] font-medium uppercase tracking-widest transition-colors hover:text-white"
+                style={{ color: '#4a5568' }}
               >
                 {crumb.label}
               </Link>
             ) : (
-              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest"
+                style={{ color: '#e2e8f0' }}
+              >
                 {crumb.label}
               </span>
             )}
@@ -64,19 +84,19 @@ export function Header() {
           href="https://github.com/spencermarx/open-code-review"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-          aria-label="Documentation on GitHub"
-          title="Docs"
+          className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-white/5"
+          style={{ color: '#4a5568' }}
+          aria-label="GitHub"
         >
-          <Github className="h-4 w-4" />
+          <Github className="h-3.5 w-3.5" />
         </a>
         <button
           onClick={cycle}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-          aria-label={`Theme: ${mode}. Click to cycle.`}
-          title={`Theme: ${mode}`}
+          className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-white/5"
+          style={{ color: '#4a5568' }}
+          aria-label={`Theme: ${mode}`}
         >
-          <ThemeIcon className="h-4 w-4" />
+          <ThemeIcon className="h-3.5 w-3.5" />
         </button>
       </div>
     </header>

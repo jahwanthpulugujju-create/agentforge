@@ -4,9 +4,25 @@ import { Header } from './header'
 
 export function RootLayout() {
   return (
-    <div className="flex h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="flex h-screen overflow-hidden" style={{ background: '#030712' }}>
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(0, 212, 255, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 212, 255, 0.035) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+        }}
+      />
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background: 'radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0, 212, 255, 0.07) 0%, transparent 70%)',
+        }}
+      />
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />

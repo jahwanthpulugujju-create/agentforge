@@ -3,35 +3,30 @@ import type { SessionStatus, FindingTriage, FindingSeverity, RoundTriage } from 
 
 type BadgeVariant = SessionStatus | FindingTriage | FindingSeverity | RoundTriage | 'default'
 
-const variantStyles: Record<BadgeVariant, string> = {
-  // Session status
-  active: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25',
-  closed: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/25',
-  // Finding triage
-  unread: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/25',
-  read: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/25',
-  acknowledged: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/25',
-  fixed: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25',
-  wont_fix: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/25',
-  // Round triage
-  needs_review: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/25',
-  in_progress: 'bg-violet-500/15 text-violet-700 dark:text-violet-400 border-violet-500/25',
-  changes_made: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/25',
-  dismissed: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/25',
-  // Finding severity
-  critical: 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/25',
-  high: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/25',
-  medium: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/25',
-  low: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/25',
-  info: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/25',
-  // Default
-  default: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/25',
+const VARIANT_STYLES: Record<string, { bg: string; color: string; border: string; dot?: boolean }> = {
+  active:       { bg: 'rgba(0,255,136,0.08)',   color: '#00ff88', border: 'rgba(0,255,136,0.25)',   dot: true },
+  closed:       { bg: 'rgba(74,85,104,0.1)',    color: '#64748b', border: 'rgba(74,85,104,0.2)' },
+  unread:       { bg: 'rgba(0,212,255,0.08)',   color: '#00d4ff', border: 'rgba(0,212,255,0.2)',    dot: true },
+  read:         { bg: 'rgba(74,85,104,0.1)',    color: '#64748b', border: 'rgba(74,85,104,0.2)' },
+  acknowledged: { bg: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: 'rgba(245,158,11,0.2)' },
+  fixed:        { bg: 'rgba(0,212,255,0.08)',   color: '#00d4ff', border: 'rgba(0,212,255,0.2)' },
+  wont_fix:     { bg: 'rgba(74,85,104,0.1)',    color: '#64748b', border: 'rgba(74,85,104,0.2)' },
+  needs_review: { bg: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: 'rgba(245,158,11,0.2)', dot: true },
+  in_progress:  { bg: 'rgba(139,92,246,0.08)', color: '#8b5cf6', border: 'rgba(139,92,246,0.2)', dot: true },
+  changes_made: { bg: 'rgba(0,255,136,0.08)',  color: '#00ff88', border: 'rgba(0,255,136,0.2)' },
+  dismissed:    { bg: 'rgba(74,85,104,0.1)',   color: '#64748b', border: 'rgba(74,85,104,0.2)' },
+  critical:     { bg: 'rgba(255,64,96,0.1)',   color: '#ff4060', border: 'rgba(255,64,96,0.3)' },
+  high:         { bg: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: 'rgba(245,158,11,0.25)' },
+  medium:       { bg: 'rgba(0,212,255,0.06)',  color: '#00d4ff', border: 'rgba(0,212,255,0.2)' },
+  low:          { bg: 'rgba(74,85,104,0.08)',  color: '#64748b', border: 'rgba(74,85,104,0.2)' },
+  info:         { bg: 'rgba(74,85,104,0.08)',  color: '#64748b', border: 'rgba(74,85,104,0.2)' },
+  default:      { bg: 'rgba(74,85,104,0.08)',  color: '#64748b', border: 'rgba(74,85,104,0.2)' },
 }
 
-const LABELS: Partial<Record<BadgeVariant, string>> = {
-  wont_fix: "Won't Fix",
+const LABELS: Partial<Record<string, string>> = {
+  wont_fix:     "Won't Fix",
   needs_review: 'Needs Review',
-  in_progress: 'In Progress',
+  in_progress:  'In Progress',
   changes_made: 'Changes Made',
 }
 
@@ -42,16 +37,20 @@ type StatusBadgeProps = {
 }
 
 export function StatusBadge({ variant, label, className }: StatusBadgeProps) {
-  const displayLabel = label ?? LABELS[variant] ?? variant.charAt(0).toUpperCase() + variant.slice(1)
+  const s = VARIANT_STYLES[variant] ?? VARIANT_STYLES.default
+  const displayLabel = label ?? LABELS[variant] ?? (variant.charAt(0).toUpperCase() + variant.slice(1))
 
   return (
     <span
-      className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium',
-        variantStyles[variant] ?? variantStyles.default,
-        className,
-      )}
+      className={cn('inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest', className)}
+      style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
     >
+      {s.dot && (
+        <span
+          className="h-1 w-1 rounded-full animate-forge-pulse"
+          style={{ background: s.color, boxShadow: `0 0 4px ${s.color}` }}
+        />
+      )}
       {displayLabel}
     </span>
   )
