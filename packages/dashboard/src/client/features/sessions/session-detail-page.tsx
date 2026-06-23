@@ -10,6 +10,7 @@ import { SessionTabs } from './components/session-tabs'
 import { LivenessHeader } from './components/liveness-header'
 import { ResumeCard } from './components/resume-card'
 import { LiveAgentStatus } from './components/live-agent-status'
+import { LiveFindingStream } from './components/live-finding-stream'
 import { fetchApi, parseUtcDate } from '../../lib/utils'
 import { formatDate } from '../../lib/date-utils'
 import type { OrchestrationEvent } from '../../lib/api-types'
@@ -151,6 +152,9 @@ export function SessionDetailPage() {
 
       {/* Live agent typing indicators — only visible when command_executions are running */}
       {id && session.status === 'active' && <LiveAgentStatus sessionId={id} />}
+
+      {/* Live finding stream — simulates agents surfacing findings in real-time */}
+      {id && session.status === 'active' && <LiveFindingStream sessionId={id} />}
 
       {/* Resume affordance — `paused` for stalled/orphaned (recovery flow,
           offers in-dashboard fire); `completed` for any other state with a
