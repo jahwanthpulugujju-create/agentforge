@@ -3,17 +3,20 @@ import { ThemeProvider } from './providers/theme-provider'
 import { SocketProvider } from './providers/socket-provider'
 import { QueryProvider } from './providers/query-provider'
 import { CommandStateProvider } from './providers/command-state-provider'
+import { AuthProvider } from './providers/auth-provider'
 import { router } from './router'
 
 export function App() {
   return (
     <ThemeProvider>
       <QueryProvider>
-        <SocketProvider>
-          <CommandStateProvider>
-            <RouterProvider router={router} />
-          </CommandStateProvider>
-        </SocketProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <CommandStateProvider>
+              <RouterProvider router={router} />
+            </CommandStateProvider>
+          </SocketProvider>
+        </AuthProvider>
       </QueryProvider>
     </ThemeProvider>
   )

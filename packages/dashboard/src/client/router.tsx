@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { RootLayout } from './components/layout/root-layout'
 import { ErrorBoundary, RouteErrorFallback } from './components/error-boundary'
+import { RequireAuth } from './components/require-auth'
 import { HomePage } from './features/home/home-page'
 import { SessionsPage } from './features/sessions/sessions-page'
 import { SessionDetailPage } from './features/sessions/session-detail-page'
@@ -30,6 +31,10 @@ function withErrorBoundary(element: React.ReactNode) {
   return <ErrorBoundary>{element}</ErrorBoundary>
 }
 
+function protected_(element: React.ReactNode) {
+  return <RequireAuth>{withErrorBoundary(element)}</RequireAuth>
+}
+
 export const router = createBrowserRouter([
   { path: 'login', element: <LoginPage /> },
   { path: 'register', element: <RegisterPage /> },
@@ -50,8 +55,8 @@ export const router = createBrowserRouter([
       { path: 'reviews', element: withErrorBoundary(<ReviewsPage />), errorElement: <RouteErrorFallback /> },
       { path: 'commands', element: withErrorBoundary(<CommandsPage />), errorElement: <RouteErrorFallback /> },
       { path: 'reviewers', element: withErrorBoundary(<ReviewersPage />), errorElement: <RouteErrorFallback /> },
-      { path: 'jobs', element: withErrorBoundary(<ReviewJobsPage />) },
-      { path: 'settings/api-keys', element: withErrorBoundary(<ApiKeysPage />) },
+      { path: 'jobs', element: protected_(<ReviewJobsPage />) },
+      { path: 'settings/api-keys', element: protected_(<ApiKeysPage />) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
