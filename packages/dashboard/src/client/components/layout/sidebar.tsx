@@ -26,22 +26,22 @@ function NavLink({ to, label, badge }: { to: string; label: string; badge?: numb
   return (
     <Link
       to={to}
-      className="relative flex items-center justify-between rounded px-3 py-[7px] transition-colors"
+      className="relative flex items-center justify-between rounded-md px-3 py-[7px] transition-colors"
       style={{
-        background: active ? 'rgba(255,255,255,0.04)' : 'transparent',
-        color: active ? '#e2e8f0' : '#1f2937',
+        background: active ? 'rgba(255,255,255,0.07)' : 'transparent',
+        color: active ? '#e2e8f0' : '#64748b',
       }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = '#374151' }}
-      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = '#1f2937' }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}
+      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = '#64748b' }}
     >
       {active && (
         <div className="absolute left-0 inset-y-[20%] w-px"
-          style={{ background: 'rgba(255,255,255,0.25)' }} />
+          style={{ background: 'rgba(255,255,255,0.35)' }} />
       )}
       <span className="font-mono text-[11.5px]">{label}</span>
       {badge != null && badge > 0 && (
         <span className="rounded font-mono text-[8px] px-1.5 py-px font-semibold"
-          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>
+          style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
           {badge}
         </span>
       )}
@@ -59,15 +59,17 @@ function UserWidget() {
       <div className="px-3 pb-4">
         <Link
           to="/login"
-          className="block w-full rounded px-3 py-2 text-center font-mono text-[11px] transition-all"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#1f2937' }}
+          className="block w-full rounded-md px-3 py-2 text-center font-mono text-[11px] transition-all"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#6b7280'
-            ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+            (e.currentTarget as HTMLElement).style.color = '#e2e8f0'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.18)'
+            ;(e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = '#1f2937'
-            ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'
+            (e.currentTarget as HTMLElement).style.color = '#94a3b8'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+            ;(e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'
           }}
         >
           sign in →
@@ -87,21 +89,21 @@ function UserWidget() {
 
   return (
     <div className="relative px-3 pb-4 pt-3"
-      style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+      style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left transition-colors"
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)' }}
+        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors"
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[9px] font-semibold"
-          style={{ background: 'rgba(255,255,255,0.06)', color: '#374151' }}>
+          style={{ background: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}>
           {initials}
         </div>
-        <p className="flex-1 truncate font-mono text-[10.5px]" style={{ color: '#1f2937' }}>
+        <p className="flex-1 truncate font-mono text-[10.5px]" style={{ color: '#94a3b8' }}>
           {user.name || user.email}
         </p>
         <ChevronDown className={`h-2.5 w-2.5 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
-          style={{ color: '#111827' }} />
+          style={{ color: '#64748b' }} />
       </button>
 
       {open && (
@@ -109,23 +111,23 @@ function UserWidget() {
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             className="absolute bottom-full left-2 right-2 z-20 mb-1 rounded-lg overflow-hidden shadow-2xl"
-            style={{ background: '#0a0a0e', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <div className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <p className="font-mono text-[10px]" style={{ color: '#1f2937' }}>{user.email}</p>
+            style={{ background: '#0d0d14', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <p className="font-mono text-[10px]" style={{ color: '#64748b' }}>{user.email}</p>
             </div>
             <div className="p-1">
               <Link to="/settings/api-keys" onClick={() => setOpen(false)}
                 className="flex w-full items-center gap-2 rounded px-2.5 py-2 font-mono text-[10.5px] transition-colors"
-                style={{ color: '#374151' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                style={{ color: '#94a3b8' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = '#e2e8f0' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}>
                 <Key className="h-3 w-3" /> api keys
               </Link>
               <button onClick={handleLogout}
                 className="flex w-full items-center gap-2 rounded px-2.5 py-2 font-mono text-[10.5px] transition-colors"
-                style={{ color: '#7f1d1d' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.04)'; (e.currentTarget as HTMLElement).style.color = '#f87171' }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#7f1d1d' }}>
+                style={{ color: '#94a3b8' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.06)'; (e.currentTarget as HTMLElement).style.color = '#f87171' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}>
                 <LogOut className="h-3 w-3" /> sign out
               </button>
             </div>
@@ -151,19 +153,19 @@ export function Sidebar() {
   return (
     <aside className="flex h-full w-48 shrink-0 flex-col"
       style={{
-        background: 'rgba(2,2,4,0.92)',
+        background: 'rgba(3,3,7,0.94)',
         backdropFilter: 'blur(24px)',
-        borderRight: '1px solid rgba(255,255,255,0.04)',
+        borderRight: '1px solid rgba(255,255,255,0.07)',
       }}>
 
       {/* Brand */}
       <div className="px-4 pt-4 pb-3.5"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="font-mono text-[13px] font-semibold" style={{ letterSpacing: '-0.02em', color: '#e2e8f0' }}>
           agent<span style={{ color: '#38bdf8' }}>forge</span>
         </div>
         {config?.workspaceName && (
-          <p className="font-mono text-[9.5px] truncate mt-0.5" style={{ color: '#111827' }}>
+          <p className="font-mono text-[9.5px] truncate mt-0.5" style={{ color: '#475569' }}>
             {config.workspaceName}
             {config.gitBranch && <> / {config.gitBranch}</>}
           </p>
@@ -179,7 +181,7 @@ export function Sidebar() {
 
         {user && (
           <>
-            <div className="my-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }} />
+            <div className="my-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }} />
             {AUTH_NAV.map(({ to, label }) => (
               <NavLink key={to} to={to} label={label} />
             ))}
@@ -189,14 +191,14 @@ export function Sidebar() {
 
       {/* Socket indicator */}
       <div className="flex items-center gap-1.5 px-4 py-2.5"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="h-1 w-1 rounded-full"
           style={{
-            background: status === 'connected' ? '#34d399' : '#374151',
-            boxShadow: status === 'connected' ? '0 0 5px rgba(52,211,153,0.7)' : 'none',
+            background: status === 'connected' ? '#34d399' : '#475569',
+            boxShadow: status === 'connected' ? '0 0 5px rgba(52,211,153,0.6)' : 'none',
           }} />
         <span className="font-mono text-[9.5px]"
-          style={{ color: status === 'connected' ? '#1f2937' : '#111827' }}>
+          style={{ color: status === 'connected' ? '#34d399' : '#475569' }}>
           {status}
         </span>
       </div>

@@ -6,17 +6,17 @@
 @theme {
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --radius: 0.375rem;
+  --radius: 0.5rem;
 
-  /* Premium black system — structural neutrals only */
+  /* Premium black system — structural neutrals */
   --color-forge-bg:        #030305;
-  --color-forge-surface:   rgba(255,255,255,0.018);
-  --color-forge-surface-2: rgba(255,255,255,0.032);
-  --color-forge-border:    rgba(255,255,255,0.06);
-  --color-forge-border-2:  rgba(255,255,255,0.11);
+  --color-forge-surface:   rgba(255,255,255,0.035);
+  --color-forge-surface-2: rgba(255,255,255,0.06);
+  --color-forge-border:    rgba(255,255,255,0.09);
+  --color-forge-border-2:  rgba(255,255,255,0.16);
   --color-forge-text:      #f0f4f8;
-  --color-forge-muted:     #374151;
-  --color-forge-dim:       #111827;
+  --color-forge-muted:     #94a3b8;
+  --color-forge-dim:       #64748b;
 
   /* Agent accent colors — used ONLY as thin bars and index labels */
   --color-forge-cyan:   #38bdf8;
@@ -41,14 +41,14 @@
   }
 
   :focus-visible {
-    outline: 1px solid rgba(255,255,255,0.22);
+    outline: 1px solid rgba(255,255,255,0.3);
     outline-offset: 2px;
   }
 
   ::-webkit-scrollbar { width: 3px; height: 3px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */

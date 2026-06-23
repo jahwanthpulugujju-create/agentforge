@@ -32,20 +32,22 @@ export function Header() {
     <header
       className="flex h-11 items-center justify-between px-6"
       style={{
-        background: 'rgba(6,10,18,0.85)',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(8px)',
+        background: 'rgba(4,4,10,0.88)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(12px)',
       }}
     >
       <nav className="flex items-center gap-1.5 font-mono text-xs" aria-label="Breadcrumb">
         {crumbs.map((c, i) => (
           <span key={c.path} className="flex items-center gap-1.5">
-            {i > 0 && <span style={{ color: '#1e293b' }}>/</span>}
+            {i > 0 && <span style={{ color: '#334155' }}>/</span>}
             {i < crumbs.length - 1 ? (
               <Link
                 to={c.path}
-                className="transition-colors hover:text-white"
-                style={{ color: '#2d3748' }}
+                className="transition-colors"
+                style={{ color: '#475569' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#475569' }}
               >
                 {c.label}
               </Link>
@@ -60,8 +62,10 @@ export function Header() {
         href="https://github.com/spencermarx/open-code-review"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex h-7 w-7 items-center justify-center rounded transition-all hover:bg-white/[0.04]"
-        style={{ color: '#2d3748' }}
+        className="flex h-7 w-7 items-center justify-center rounded-md transition-all"
+        style={{ color: '#64748b' }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#94a3b8'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#64748b'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
       >
         <Github className="h-3.5 w-3.5" />
       </a>

@@ -24,14 +24,14 @@ function ArchWidget() {
           return <line key={i}
             x1={`${n1.x+3.5}%`} y1={`${n1.y+8}%`}
             x2={`${n2.x+3.5}%`} y2={`${n2.y+8}%`}
-            stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+            stroke="rgba(255,255,255,0.14)" strokeWidth="1" />
         })}
       </svg>
       {nodes.map(n => (
         <div key={n.id} className="absolute font-mono text-[9px] rounded px-1.5 py-0.5"
           style={{ left: `${n.x}%`, top: `${n.y}%`,
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
-            color: 'rgba(255,255,255,0.4)', transform: 'translateY(-50%)' }}>
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.13)',
+            color: 'rgba(255,255,255,0.55)', transform: 'translateY(-50%)' }}>
           {n.id}
         </div>
       ))}
@@ -42,9 +42,9 @@ function ArchWidget() {
 function CodeWidget() {
   return (
     <div className="rounded font-mono text-[10px] leading-[1.75] overflow-hidden"
-      style={{ background: 'rgba(0,0,0,0.4)', padding: '9px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+      style={{ background: 'rgba(0,0,0,0.5)', padding: '9px 12px', border: '1px solid rgba(255,255,255,0.09)' }}>
       <div><span style={{ color: '#569cd6' }}>const</span><span style={{ color: '#9cdcfe' }}> query</span><span style={{ color: '#d4d4d4' }}> = </span><span style={{ color: '#ce9178' }}>`SELECT * FROM users`</span></div>
-      <div style={{ color: '#608b4e' }}>{'// ← no parameterization'}</div>
+      <div style={{ color: '#6a9955' }}>{'// ← no parameterization'}</div>
       <div><span style={{ color: '#569cd6' }}>await</span><span style={{ color: '#d4d4d4' }}> db.</span><span style={{ color: '#dcdcaa' }}>query</span><span style={{ color: '#d4d4d4' }}>(query)</span></div>
       <div style={{ color: '#f87171', fontSize: 9 }}>█ SQL injection risk</div>
     </div>
@@ -59,15 +59,15 @@ function RiskWidget() {
         <span className="font-mono text-[2.25rem] font-bold leading-none" style={{ color: '#f8fafc' }}>
           {score.toFixed(1)}
         </span>
-        <span className="font-mono text-[9px]" style={{ color: '#1f2937' }}>CVSS / 10</span>
+        <span className="font-mono text-[9px]" style={{ color: '#64748b' }}>CVSS / 10</span>
       </div>
-      <div className="h-px w-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
+      <div className="h-px w-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
         <div className="h-px" style={{ width: `${score * 10}%`, background: '#f87171' }} />
       </div>
       <div className="flex flex-wrap gap-1">
         {['SQLi','XSS','SSRF','Auth bypass','Secrets'].map(v => (
           <span key={v} className="rounded font-mono text-[8.5px] px-1.5 py-px"
-            style={{ background: 'rgba(248,113,113,0.06)', color: 'rgba(248,113,113,0.55)', border: '1px solid rgba(248,113,113,0.12)' }}>
+            style={{ background: 'rgba(248,113,113,0.1)', color: 'rgba(248,113,113,0.8)', border: '1px solid rgba(248,113,113,0.2)' }}>
             {v}
           </span>
         ))}
@@ -85,14 +85,14 @@ function PerfWidget() {
           <div key={i} className="flex-1 rounded-sm" style={{
             height: `${h}%`,
             background: h > 70
-              ? 'rgba(255,255,255,0.18)'
+              ? 'rgba(255,255,255,0.28)'
               : h > 45
-                ? 'rgba(255,255,255,0.08)'
-                : 'rgba(255,255,255,0.04)',
+                ? 'rgba(255,255,255,0.14)'
+                : 'rgba(255,255,255,0.06)',
           }} />
         ))}
       </div>
-      <div className="flex justify-between font-mono text-[8.5px]" style={{ color: '#1f2937' }}>
+      <div className="flex justify-between font-mono text-[8.5px]" style={{ color: '#64748b' }}>
         <span>p50 · 38ms</span><span>p99 · 612ms</span>
       </div>
     </div>
@@ -113,12 +113,12 @@ function ReviewWidget() {
         <div key={text} className="flex items-center gap-2">
           <div className="h-2.5 w-2.5 shrink-0 rounded-sm flex items-center justify-center"
             style={{
-              background: done ? 'rgba(255,255,255,0.06)' : 'transparent',
-              border: `1px solid ${done ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.05)'}`,
+              background: done ? 'rgba(255,255,255,0.1)' : 'transparent',
+              border: `1px solid ${done ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)'}`,
             }}>
-            {done && <svg viewBox="0 0 10 10" className="h-1.5 w-1.5"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            {done && <svg viewBox="0 0 10 10" className="h-1.5 w-1.5"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
-          <span className="text-[10px]" style={{ color: done ? '#374151' : '#111827' }}>
+          <span className="text-[10px]" style={{ color: done ? '#94a3b8' : '#475569' }}>
             {text}
           </span>
         </div>
@@ -129,9 +129,9 @@ function ReviewWidget() {
 
 function DevilWidget() {
   return (
-    <div className="space-y-2" style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.05)' }}>
-      <p className="text-[1.75rem] leading-none" style={{ color: 'rgba(255,255,255,0.07)' }}>"</p>
-      <p className="text-[11px] italic leading-relaxed" style={{ color: '#1f2937' }}>
+    <div className="space-y-2" style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.35)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)' }}>
+      <p className="text-[1.75rem] leading-none" style={{ color: 'rgba(255,255,255,0.18)' }}>"</p>
+      <p className="text-[11px] italic leading-relaxed" style={{ color: '#94a3b8' }}>
         Why REST when gRPC cuts latency by 40% and gives you a typed contract for free?
       </p>
     </div>
@@ -170,28 +170,28 @@ export function HomePage() {
   const s = statsQ.data
 
   return (
-    <div className="max-w-5xl space-y-20 pb-20">
+    <div className="max-w-5xl space-y-24 pb-24">
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="pt-6 space-y-8">
-        <p className="font-mono text-[11px]" style={{ color: '#111827' }}>
+      <section className="pt-8 space-y-10">
+        <p className="font-mono text-[11px] tracking-wider uppercase" style={{ color: '#475569' }}>
           agentforge / overview
         </p>
 
         <div>
-          <h1 className="text-[3.75rem] font-bold leading-[1.02]"
-            style={{ color: '#f8fafc', letterSpacing: '-0.03em' }}>
+          <h1 className="text-[4rem] font-bold leading-[1.0]"
+            style={{ color: '#f8fafc', letterSpacing: '-0.035em' }}>
             Code review,<br />
             done by committee.
           </h1>
-          <p className="mt-5 text-base leading-relaxed max-w-[38ch]" style={{ color: '#1f2937' }}>
+          <p className="mt-6 text-[15px] leading-relaxed max-w-[42ch]" style={{ color: '#94a3b8' }}>
             Six agents argue about your code before it ships. One writes it.
             One breaks it. One questions whether it should exist at all.
           </p>
         </div>
 
-        {/* Stats — monumental numbers on black */}
-        <div className="flex items-stretch pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        {/* Stats — monumental numbers */}
+        <div className="flex items-stretch pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           {[
             { n: s?.totalSessions    ?? '—', l: 'sessions'     },
             { n: s?.completedReviews ?? '—', l: 'reviews done' },
@@ -201,21 +201,22 @@ export function HomePage() {
             <div key={l} className="flex-1 relative">
               {i > 0 && (
                 <div className="absolute left-0 top-0 bottom-0 w-px"
-                  style={{ background: 'rgba(255,255,255,0.05)' }} />
+                  style={{ background: 'rgba(255,255,255,0.08)' }} />
               )}
               <div className={`${i > 0 ? 'pl-8' : ''}`}>
                 <div className="text-[3.25rem] font-bold font-mono leading-none tracking-tight"
                   style={{ color: '#f8fafc' }}>
                   {n}
                 </div>
-                <div className="font-mono text-[9px] mt-2 uppercase tracking-widest" style={{ color: '#111827' }}>
+                <div className="font-mono text-[10px] mt-2.5 uppercase tracking-widest" style={{ color: '#64748b' }}>
                   {l}
                 </div>
               </div>
             </div>
           ))}
           <div className="flex items-start pt-1 pl-8">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 rounded-full px-3 py-1"
+              style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)' }}>
               <div className="h-1.5 w-1.5 rounded-full animate-forge-pulse" style={{ background: '#34d399' }} />
               <span className="font-mono text-[10px]" style={{ color: '#34d399' }}>live</span>
             </div>
@@ -226,32 +227,34 @@ export function HomePage() {
       {/* ── Agent grid ────────────────────────────────────────────────────── */}
       <section>
         <div className="flex items-baseline justify-between mb-8">
-          <h2 className="text-lg font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+          <h2 className="text-xl font-semibold" style={{ color: '#f0f4f8', letterSpacing: '-0.02em' }}>
             The Six
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#111827' }}>
+          <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color: '#475569' }}>
             adversarial · consensus required
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-px" style={{ background: 'rgba(255,255,255,0.05)' }}>
+        <div className="grid grid-cols-3 gap-px" style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 10, overflow: 'hidden', boxShadow: '0 0 0 1px rgba(255,255,255,0.08)' }}>
           {AGENTS.map((a) => (
-            <div key={a.idx} className="flex flex-col"
-              style={{ background: '#030305' }}>
-              {/* Agent color — 2px accent strip, the ONLY color on the card */}
-              <div style={{ height: 2, background: a.color, opacity: 0.7 }} />
+            <div key={a.idx} className="flex flex-col group transition-colors"
+              style={{ background: '#06060a' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#0a0a10' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = '#06060a' }}>
+              {/* Agent color — 2px accent strip */}
+              <div style={{ height: 2, background: a.color, opacity: 0.85 }} />
 
               <div className="flex flex-col flex-1 gap-4 p-5">
                 <div>
-                  <div className="flex items-baseline justify-between mb-1.5">
-                    <span className="text-[15px] font-semibold" style={{ color: '#e2e8f0' }}>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="text-[15px] font-semibold" style={{ color: '#e8edf2' }}>
                       {a.name}
                     </span>
-                    <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.1)' }}>
+                    <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
                       {a.idx}
                     </span>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: '#1f2937' }}>
+                  <p className="text-[11.5px] leading-relaxed" style={{ color: '#64748b' }}>
                     {a.tagline}
                   </p>
                 </div>
@@ -259,11 +262,11 @@ export function HomePage() {
                 <div className="flex-1">{a.widget}</div>
 
                 <div className="flex items-center justify-between"
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 10 }}>
-                  <span className="font-mono text-[8.5px]" style={{ color: '#111827' }}>{a.tech}</span>
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 12 }}>
+                  <span className="font-mono text-[8.5px]" style={{ color: '#475569' }}>{a.tech}</span>
                   <div className="flex items-center gap-1.5">
-                    <div className="h-1 w-1 rounded-full" style={{ background: '#1f2937' }} />
-                    <span className="font-mono text-[8.5px]" style={{ color: '#111827' }}>standby</span>
+                    <div className="h-1 w-1 rounded-full" style={{ background: '#334155' }} />
+                    <span className="font-mono text-[8.5px]" style={{ color: '#475569' }}>standby</span>
                   </div>
                 </div>
               </div>
@@ -277,23 +280,23 @@ export function HomePage() {
 
         {/* Adversarial loop */}
         <div>
-          <h2 className="text-lg font-semibold mb-4" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+          <h2 className="text-xl font-semibold mb-3" style={{ color: '#f0f4f8', letterSpacing: '-0.02em' }}>
             The adversarial loop
           </h2>
-          <p className="text-[13px] leading-relaxed mb-8" style={{ color: '#1f2937' }}>
+          <p className="text-[13.5px] leading-relaxed mb-8" style={{ color: '#64748b' }}>
             Agents vote. Both Security and Performance must approve. No single
             agent can unblock a bad PR.
           </p>
 
           <ol className="space-y-0">
             {LOOP_STEPS.map((step, i) => (
-              <li key={i} className="flex gap-4 py-3"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                <span className="font-mono text-[9px] shrink-0 mt-[3px]"
-                  style={{ color: 'rgba(255,255,255,0.08)' }}>
+              <li key={i} className="flex gap-4 py-3.5 group"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <span className="font-mono text-[9px] shrink-0 mt-[3px] tabular-nums"
+                  style={{ color: '#334155' }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="text-[12.5px] leading-snug" style={{ color: '#374151' }}>
+                <span className="text-[13px] leading-snug" style={{ color: '#94a3b8' }}>
                   {step}
                 </span>
               </li>
@@ -303,20 +306,20 @@ export function HomePage() {
 
         {/* Recent sessions */}
         <div>
-          <div className="flex items-baseline justify-between mb-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#e2e8f0', letterSpacing: '-0.01em' }}>
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="text-xl font-semibold" style={{ color: '#f0f4f8', letterSpacing: '-0.02em' }}>
               Recent
             </h2>
             <Link to="/sessions"
               className="flex items-center gap-1 text-[11px] transition-colors"
-              style={{ color: '#1f2937' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#6b7280' }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#1f2937' }}>
+              style={{ color: '#475569' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#475569' }}>
               all sessions <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
           {sessionsQ.isLoading ? (
-            <p className="font-mono text-[11px]" style={{ color: '#111827' }}>loading…</p>
+            <p className="font-mono text-[11px]" style={{ color: '#475569' }}>loading…</p>
           ) : (
             <RecentSessions sessions={sessionsQ.data ?? []} />
           )}
@@ -324,8 +327,8 @@ export function HomePage() {
       </section>
 
       {(statsQ.isError || sessionsQ.isError) && (
-        <div className="rounded p-4 font-mono text-[12px]"
-          style={{ background: 'rgba(248,113,113,0.04)', border: '1px solid rgba(248,113,113,0.12)', color: '#f87171' }}>
+        <div className="rounded-lg p-4 font-mono text-[12px]"
+          style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.18)', color: '#f87171' }}>
           Server unreachable — check the backend is running.
         </div>
       )}
