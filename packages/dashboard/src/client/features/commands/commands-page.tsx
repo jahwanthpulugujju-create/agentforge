@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Terminal } from 'lucide-react'
 import { useSocket, useSocketEvent } from '../../providers/socket-provider'
 import { useCommandState } from '../../providers/command-state-provider'
 import { useAiCli } from '../../hooks/use-ai-cli'
@@ -8,6 +7,7 @@ import { CommandPalette, parseCommandString, type ParsedCommand } from './compon
 import { WorkflowOutput } from './components/workflow-output'
 import { CommandHistory } from './components/command-history'
 import { TabBar } from './components/tab-bar'
+import { DemoPanel } from './components/demo-panel'
 
 const CLI_DISPLAY_NAMES: Record<string, string> = {
   claude: 'Claude Code',
@@ -31,7 +31,6 @@ export function CommandsPage() {
   const [prefill, setPrefill] = useState<ParsedCommand | null>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
 
-  // Invalidate command history when ANY command finishes
   useSocketEvent('command:finished', () => {
     queryClient.invalidateQueries({ queryKey: ['command-history'] })
   })
@@ -69,81 +68,56 @@ export function CommandsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Command Center</h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-sm" style={{ color: '#64748b' }}>
           Launch AI-powered code review workflows.
           {activeCli && (
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-              Using {CLI_DISPLAY_NAMES[activeCli] ?? activeCli}
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[10px]"
+              style={{ background: 'rgba(255,255,255,0.06)', color: '#94a3b8' }}>
+              using {CLI_DISPLAY_NAMES[activeCli] ?? activeCli}
             </span>
           )}
         </p>
       </div>
 
+      {/* ── Demo panel — hero when CLI is absent, collapsed section when available ── */}
       {!isAvailable ? (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <div className="flex items-start gap-3">
-            <Terminal className="mt-0.5 h-5 w-5 shrink-0 text-zinc-400" />
-            <div>
-              <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                {isDisabledByConfig ? 'AI Commands Disabled' : 'AI CLI Required'}
-              </h3>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                {isDisabledByConfig ? (
-                  <>
-                    AI commands are turned off in your project config.
-                    Set <code className="rounded bg-zinc-200 px-1 py-0.5 text-xs dark:bg-zinc-800">ai_cli</code> to{' '}
-                    <code className="rounded bg-zinc-200 px-1 py-0.5 text-xs dark:bg-zinc-800">auto</code>,{' '}
-                    <code className="rounded bg-zinc-200 px-1 py-0.5 text-xs dark:bg-zinc-800">claude</code>, or{' '}
-                    <code className="rounded bg-zinc-200 px-1 py-0.5 text-xs dark:bg-zinc-800">opencode</code>{' '}
-                    in <code className="rounded bg-zinc-200 px-1 py-0.5 text-xs dark:bg-zinc-800">.ocr/config.yaml</code> to
-                    enable them.
-                  </>
-                ) : (
-                  <>
-                    Install{' '}
-                    <a
-                      href="https://docs.anthropic.com/en/docs/claude-code/getting-started"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                    >
-                      Claude Code
-                    </a>
-                    {' '}or{' '}
-                    <a
-                      href="https://opencode.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                    >
-                      OpenCode
-                    </a>
-                    {' '}to run AI-powered review commands from the dashboard.
-                  </>
-                )}
-              </p>
-              <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
-                You can still use OCR slash commands directly from your IDE, and browse
-                existing sessions, reviews, and maps below.
-              </p>
-            </div>
+        /* CLI not installed: demo is the primary action */
+        <div className="space-y-4">
+          <DemoPanel hero />
+
+          {/* Explain the real path */}
+          <div className="rounded-lg px-5 py-4"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-[12px] font-medium mb-1" style={{ color: '#64748b' }}>
+              {isDisabledByConfig ? 'AI commands disabled by config' : 'To run live reviews'}
+            </p>
+            <p className="text-[11.5px]" style={{ color: '#475569' }}>
+              {isDisabledByConfig
+                ? 'Set ai_cli to auto, claude, or opencode in .ocr/config.yaml to enable live workflows.'
+                : 'Install Claude Code or OpenCode, then restart the server. Until then, use Demo Mode above.'}
+            </p>
           </div>
         </div>
       ) : (
-        <div ref={paletteRef}>
-          <CommandPalette
-            isRunning={false}
-            runningCount={runningCount}
-            onRunCommand={handleRunCommand}
-            prefill={prefill}
-            onPrefillConsumed={handlePrefillConsumed}
-          />
-        </div>
+        /* CLI available: palette first, demo as secondary collapsible */
+        <>
+          <div ref={paletteRef}>
+            <CommandPalette
+              isRunning={false}
+              runningCount={runningCount}
+              onRunCommand={handleRunCommand}
+              prefill={prefill}
+              onPrefillConsumed={handlePrefillConsumed}
+            />
+          </div>
+          <DemoPanel />
+        </>
       )}
 
-      {/* Tabbed output area */}
+      {/* ── Tabbed output area (shared by real runs and demo) ── */}
       {tabs.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
+        <div className="overflow-hidden rounded-lg"
+          style={{ border: '1px solid rgba(255,255,255,0.09)' }}>
           <TabBar
             tabs={tabs}
             activeTabId={activeTabId}

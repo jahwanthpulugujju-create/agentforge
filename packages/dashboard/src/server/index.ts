@@ -38,6 +38,7 @@ import { DbSyncWatcher } from './services/db-sync-watcher.js'
 import { registerCommandHandlers, clearAllSpawnMarkers } from './socket/command-runner.js'
 import { registerChatHandlers, cleanupAllChats } from './socket/chat-handler.js'
 import { registerPostHandlers, cleanupAllPostGenerations } from './socket/post-handler.js'
+import { registerDemoHandlers } from './socket/demo-handler.js'
 import {
   replayCommandLog,
   sweepStaleAgentSessions,
@@ -592,6 +593,7 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
     const jwtUser = jwtToken ? verifySocketToken(jwtToken) : null
 
     registerSocketHandlers(io, socket)
+    registerDemoHandlers(io, socket)
     registerPresenceHandlers(io, socket, jwtUser)
     registerCommandHandlers(io, socket, db, ocrDir, aiCliService, sessionCapture)
     registerChatHandlers(io, socket, db, ocrDir, aiCliService)
