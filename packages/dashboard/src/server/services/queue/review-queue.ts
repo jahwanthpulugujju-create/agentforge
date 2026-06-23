@@ -1,9 +1,7 @@
 /**
  * Review job queue — PostgreSQL-backed, horizontally scalable.
  *
- * Uses PostgreSQL advisory locks + polling for queue semantics without
- * requiring Redis. When REDIS_URL is set, swaps to BullMQ automatically.
- *
+ * Uses PostgreSQL advisory locks + polling. 6 agents + debate + synthesis.
  * Job lifecycle: pending → queued → running → completed | failed | cancelled
  */
 
@@ -24,7 +22,7 @@ export type JobSubmission = {
 
 const WORKER_ID = `worker-${process.pid}-${Date.now()}`
 const POLL_INTERVAL_MS = 3000
-const JOB_TIMEOUT_MS = 10 * 60 * 1000 // 10 min
+const JOB_TIMEOUT_MS = 15 * 60 * 1000 // 15 min — War Room takes longer with 6 agents
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
 let io: SocketIOServer | null = null
@@ -129,15 +127,25 @@ async function claimNextJob(): Promise<ReviewJobRow | null> {
   })
 }
 
+// 6 agents + debate + synthesis = 8 total phases
+const ALL_PHASES = ['architect', 'tech-lead', 'security', 'performance', 'correctness', 'devil-advocate', 'debate', 'synthesis']
+
+const PHASE_NUMBERS: Record<string, number> = {
+  'architect':      1,
+  'tech-lead':      2,
+  'security':       3,
+  'performance':    4,
+  'correctness':    5,
+  'devil-advocate': 6,
+  'debate':         7,
+  'synthesis':      8,
+}
+
 async function processJob(job: ReviewJobRow): Promise<void> {
   const jobId = job.id
   const userId = job.user_id
 
-  async function updateProgress(
-    phase: string,
-    phaseNumber: number,
-    progressPercent: number
-  ) {
+  async function updateProgress(phase: string, phaseNumber: number, progressPercent: number) {
     await pgQuery(
       `UPDATE review_jobs
        SET phase = $1, phase_number = $2, progress_percent = $3, status = 'running', updated_at = NOW()
@@ -154,16 +162,6 @@ async function processJob(job: ReviewJobRow): Promise<void> {
 
   await updateProgress('starting', 0, 0)
 
-  const phaseNames = ['tech-lead', 'security', 'performance', 'correctness', 'synthesis']
-  const phaseMap: Record<string, number> = {
-    'tech-lead': 1,
-    'security': 2,
-    'performance': 3,
-    'correctness': 4,
-    'synthesis': 5,
-  }
-
-  let currentPhase = 'starting'
   const config: ReviewAgentConfig = {
     model: job.model,
     provider: job.provider as 'anthropic' | 'openai',
@@ -174,11 +172,11 @@ async function processJob(job: ReviewJobRow): Promise<void> {
   }
 
   const onEvent = async (event: ReviewStreamEvent) => {
-    if (event.type === 'phase_start') {
-      const phaseNum = phaseMap[event.phase] ?? 0
-      const pct = Math.round((phaseNum / (phaseNames.length + 1)) * 90)
-      currentPhase = event.phase
-      await updateProgress(event.phase, phaseNum, pct).catch(() => {})
+    if (event.type === 'phase_start' || event.type === 'debate_start') {
+      const phaseName = event.type === 'debate_start' ? 'debate' : event.phase
+      const phaseNum = PHASE_NUMBERS[phaseName] ?? 0
+      const pct = Math.round((phaseNum / ALL_PHASES.length) * 90)
+      await updateProgress(phaseName, phaseNum, pct).catch(() => {})
     }
 
     if (event.type === 'token') {
@@ -186,6 +184,22 @@ async function processJob(job: ReviewJobRow): Promise<void> {
         jobId,
         phase: event.phase,
         text: event.text,
+      })
+    }
+
+    if (event.type === 'debate_turn') {
+      io?.to(`job:${jobId}`).emit('job:debate', {
+        jobId,
+        agent: event.agent,
+        text: event.text,
+      })
+    }
+
+    if (event.type === 'phase_complete') {
+      io?.to(`job:${jobId}`).emit('job:phase_complete', {
+        jobId,
+        phase: event.phase,
+        findings_count: event.findings_count,
       })
     }
 
@@ -201,7 +215,6 @@ async function processJob(job: ReviewJobRow): Promise<void> {
   const diff = job.diff_content ?? ''
   const result = await runDirectReview(diff, config, userId, onEvent)
 
-  // Store findings
   for (const finding of result.findings) {
     await pgQuery(
       `INSERT INTO review_findings_pg
@@ -222,7 +235,6 @@ async function processJob(job: ReviewJobRow): Promise<void> {
     )
   }
 
-  // Mark complete
   await pgQuery(
     `UPDATE review_jobs
      SET status = 'completed', phase = 'complete', progress_percent = 100,
@@ -251,7 +263,7 @@ async function poll(): Promise<void> {
     const job = await claimNextJob()
     if (!job) return
 
-    processJob(job).catch(async (err) => {
+    void processJob(job).catch(async (err) => {
       console.error(`Job ${job.id} failed:`, err)
       await pgQuery(
         `UPDATE review_jobs
@@ -269,8 +281,6 @@ async function poll(): Promise<void> {
   }
 }
 
-// ── Queue lifecycle ──
-
 export function startWorker(socketIo: SocketIOServer): void {
   io = socketIo
   if (!isPostgresAvailable()) {
@@ -278,12 +288,10 @@ export function startWorker(socketIo: SocketIOServer): void {
     return
   }
   pollTimer = setInterval(() => void poll(), POLL_INTERVAL_MS)
+  void poll() // run immediately on start
   console.log(`  Job queue:         started (worker ${WORKER_ID})`)
 }
 
 export function stopWorker(): void {
-  if (pollTimer) {
-    clearInterval(pollTimer)
-    pollTimer = null
-  }
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
 }

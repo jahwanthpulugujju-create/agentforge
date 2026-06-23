@@ -2,7 +2,15 @@
  * Shared types for the direct AI API service layer.
  */
 
-export type AgentRole = 'tech-lead' | 'security' | 'performance' | 'correctness' | 'synthesis'
+export type AgentRole =
+  | 'architect'
+  | 'tech-lead'
+  | 'security'
+  | 'performance'
+  | 'correctness'
+  | 'devil-advocate'
+  | 'debate'
+  | 'synthesis'
 
 export type ReviewAgentConfig = {
   model?: string
@@ -19,6 +27,8 @@ export type ReviewStreamEvent =
   | { type: 'phase_start'; phase: AgentRole | string }
   | { type: 'phase_complete'; phase: AgentRole | string; findings_count: number }
   | { type: 'token'; phase: AgentRole | string; text: string }
+  | { type: 'debate_start'; participants: string[] }
+  | { type: 'debate_turn'; agent: string; text: string }
   | { type: 'parse_error'; phase: AgentRole | string; text: string }
   | { type: 'review_complete'; verdict: string; findings_count: number }
   | { type: 'error'; message: string }
