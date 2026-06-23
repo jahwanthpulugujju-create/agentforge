@@ -648,16 +648,16 @@ The real-time additions are well-scoped. Main risk area: WebSocket authenticatio
 ensure the same auth checks applied to REST endpoints are applied to socket connections.
 `,ago(8*MIN)])
 
-for (const [uid,persona,pid,name,model,hb] of [
-  ['cmd-active-001','security',12345,'Security Reviewer','claude-opus-4-5',ago(25)],
-  ['cmd-active-002','architect',12346,'Architect','claude-sonnet-4-5',ago(40)],
-  ['cmd-active-003','coder',12347,'Coder','claude-sonnet-4-5',ago(18)],
-  ['cmd-active-004','performance',12348,'Performance Reviewer','claude-haiku-4-5',ago(55)],
-  ['cmd-active-005','devil_advocate',12349,'Devil\'s Advocate','claude-opus-4-5',ago(8)],
-  ['cmd-active-006','testing',12350,'Testing Reviewer','claude-haiku-4-5',ago(32)],
+for (const [uid,persona,name,model,hb] of [
+  ['cmd-active-001','security','Security Reviewer','claude-opus-4-5',ago(25)],
+  ['cmd-active-002','architect','Architect','claude-sonnet-4-5',ago(40)],
+  ['cmd-active-003','coder','Coder','claude-sonnet-4-5',ago(18)],
+  ['cmd-active-004','performance','Performance Reviewer','claude-haiku-4-5',ago(55)],
+  ['cmd-active-005','devil_advocate','Devil\'s Advocate','claude-opus-4-5',ago(8)],
+  ['cmd-active-006','testing','Testing Reviewer','claude-haiku-4-5',ago(32)],
 ]) {
   run(`INSERT INTO command_executions (uid,command,args,exit_code,pid,is_detached,started_at,finished_at,workflow_id,vendor,persona,instance_index,name,resolved_model,last_heartbeat_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-    [uid,'claude',JSON.stringify(['--no-color','--persona',persona]),null,pid,1,ago(3*MIN),null,S4,'claude',persona,1,name,model,hb])
+    [uid,'claude',JSON.stringify(['--no-color','--persona',persona]),null,null,1,ago(3*MIN),null,S4,'claude',persona,1,name,model,hb])
 }
 
 console.log('✓ Session 4: dashboard-realtime (active, reviews phase, 6 agents running)')

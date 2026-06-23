@@ -193,6 +193,33 @@ export function createSessionsRouter(db: Database): Router {
     }
   })
 
+  // GET /api/sessions/:id/agents — Running command_executions for this session
+  router.get('/:id/agents', (req, res) => {
+    try {
+      const sessionId = req.params['id'] as string
+      const rows = db
+        .prepare(
+          `SELECT uid, name, persona, vendor, resolved_model, started_at, last_heartbeat_at
+           FROM command_executions
+           WHERE workflow_id = ? AND finished_at IS NULL AND persona IS NOT NULL
+           ORDER BY started_at ASC`,
+        )
+        .all(sessionId) as {
+          uid: string
+          name: string | null
+          persona: string
+          vendor: string | null
+          resolved_model: string | null
+          started_at: string
+          last_heartbeat_at: string | null
+        }[]
+      res.json({ agents: rows })
+    } catch (err) {
+      console.error('Failed to fetch session agents:', err)
+      res.status(500).json({ error: 'Failed to fetch agents' })
+    }
+  })
+
   // GET /api/sessions/:id/events — Get orchestration events for session
   router.get('/:id/events', (req, res) => {
     try {
