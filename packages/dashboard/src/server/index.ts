@@ -83,6 +83,19 @@ function isLocalhostOrigin(origin: string | undefined): boolean {
   return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
 }
 
+function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true
+  if (isLocalhostOrigin(origin)) return true
+  if (origin === 'https://client-flame-nine-56.vercel.app') return true
+
+  const allowed = process.env.ALLOWED_ORIGINS
+  if (allowed) {
+    const list = allowed.split(',').map((o) => o.trim())
+    if (list.includes(origin)) return true
+  }
+  return false
+}
+
 // ── Bearer token authentication ──
 // Generate a cryptographically random token at startup.
 // All API and Socket.IO requests must present this token.
@@ -93,11 +106,13 @@ const httpServer = createServer(app)
 
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV !== 'production'
-      // Allow any localhost origin (dynamic ports) and no-origin requests
-      // (curl, Postman, CLI socket clients). Bearer token is the real gate.
-      ? (origin, cb) => cb(null, !origin || isLocalhostOrigin(origin))
-      : false,
+    origin: (origin, cb) => {
+      if (isAllowedOrigin(origin)) {
+        cb(null, true)
+      } else {
+        cb(null, false)
+      }
+    },
   },
   maxHttpBufferSize: 1e6, // 1 MB — explicit default; review if large payloads are needed
 })
@@ -106,21 +121,21 @@ const io = new SocketIOServer(httpServer, {
 
 app.use(express.json())
 
-if (process.env.NODE_ENV !== 'production') {
-  app.use((_req, res, next) => {
-    const origin = _req.headers.origin
-    if (origin && isLocalhostOrigin(origin)) {
+app.use((req, res, next) => {
+  const origin = req.headers.origin
+  if (isAllowedOrigin(origin)) {
+    if (origin) {
       res.header('Access-Control-Allow-Origin', origin)
     }
     res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    if (_req.method === 'OPTIONS') {
+    if (req.method === 'OPTIONS') {
       res.sendStatus(204)
       return
     }
-    next()
-  })
-}
+  }
+  next()
+})
 
 // ── Health check (available without auth, before DB init) ──
 app.get('/api/health', (_req, res) => {
