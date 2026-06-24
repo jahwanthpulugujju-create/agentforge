@@ -2,7 +2,7 @@
 
 **Team:** Z-Vibers | **College:** BVRIT | **Hackathon:** InnovateZ 2026
 
-[![Demo](https://img.shields.io/badge/Demo-Live-green)](https://f2f0cbceb1381921-106-222-232-131.serveousercontent.com)
+[![Demo](https://img.shields.io/badge/Demo-Live-green)](https://90dee2bfe18fc3c4-106-222-232-131.serveousercontent.com)
 [![Video](https://img.shields.io/badge/Video-YouTube-red)](https://youtube.com/watch?v=YOUR_VIDEO_ID)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
@@ -84,7 +84,7 @@ docker-compose up --build
 ## 🎬 Demo
 
 ### Live Demo
-🔗 [Click here to try AgentForge](https://f2f0cbceb1381921-106-222-232-131.serveousercontent.com)
+🔗 [Click here to try AgentForge](https://90dee2bfe18fc3c4-106-222-232-131.serveousercontent.com)
 
 ### Video Walkthrough
 📹 [Watch 3-minute demo on YouTube](https://youtube.com/watch?v=YOUR_VIDEO_ID)
