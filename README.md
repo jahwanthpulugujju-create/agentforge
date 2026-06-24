@@ -139,8 +139,8 @@ docker-compose up --build
 | Name | Role | GitHub |
 |------|------|--------|
 | Jahwanth Pulugujju | Full-Stack Developer | [@jahwanthpulugujju-create](https://github.com/jahwanthpulugujju-create) |
-| [Teammate 1] | AI/ML Engineer | [@teammate1](https://github.com/teammate1) |
-| [Teammate 2] | Frontend Developer | [@teammate2](https://github.com/teammate2) |
+| [Teammate 1] | AI/ML Engineer | [@teammate1](https://github.com/) |
+| [Teammate 2] | Frontend Developer | [@teammate2](https://github.com/) |
 
 ---
 
