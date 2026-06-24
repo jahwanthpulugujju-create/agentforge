@@ -2,7 +2,7 @@
 
 **Team:** Z-Vibers | **College:** BVRIT | **Hackathon:** InnovateZ 2026
 
-[![Demo](https://img.shields.io/badge/Demo-Live-green)](https://8999ed55-a035-4b2f-a7b1-f6fff8f658f3-00-2mxdnlfutfpkh.sisko.replit.dev/)
+[![Demo](https://img.shields.io/badge/Demo-Live-green)]([(https://b0043aff-9576-4d72-8b73-dad701e3b641-00-393r9t7o7jwfe.sisko.replit.dev/))
 [![Video](https://img.shields.io/badge/Video-YouTube-red)](https://youtube.com/watch?v=YOUR_VIDEO_ID)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
