@@ -14,7 +14,8 @@ export function cn(...inputs: ClassValue[]) {
  * Automatically injects the Authorization bearer token header.
  */
 export async function fetchApi<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
+  const apiUrl = import.meta.env.VITE_API_URL || ''
+  const res = await fetch(`${apiUrl}${url}`, {
     ...init,
     headers: {
       ...authHeaders(),

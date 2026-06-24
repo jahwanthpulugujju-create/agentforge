@@ -40,8 +40,9 @@ export async function ensureAuthToken(): Promise<string> {
   if (sync) return sync
 
   // Dev mode: fetch from the bootstrap endpoint (deduplicated)
+  const apiUrl = import.meta.env.VITE_API_URL || ''
   if (!fetchPromise) {
-    fetchPromise = fetch('/auth/token')
+    fetchPromise = fetch(apiUrl + '/auth/token')
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch auth token: ${res.status}`)
         return res.json()

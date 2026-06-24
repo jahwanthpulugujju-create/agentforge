@@ -34,7 +34,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     ensureAuthToken().then((token) => {
       if (cancelled) return
 
-      const socket = io({
+      const apiUrl = import.meta.env.VITE_API_URL || ''
+      const socket = io(apiUrl, {
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: Infinity,
