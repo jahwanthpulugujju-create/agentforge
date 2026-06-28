@@ -64,7 +64,7 @@ echo "USE_LOCAL_MODELS=true" >> .env
 docker-compose up --build
 ```
 
-**War Room UI:** http://localhost:5173
+**War Room UI:** 
 
 ---
 
@@ -84,7 +84,7 @@ docker-compose up --build
 ## 🎬 Demo
 
 ### Live Demo
-🔗 [Click here to try AgentForge](https://b0043aff-9576-4d72-8b73-dad701e3b641-00-393r9t7o7jwfe.sisko.replit.dev/)
+🔗 [Click here to try AgentForge]()
 
 ### Video Walkthrough
 📹 [Watch 3-minute demo on YouTube](https://youtube.com/watch?v=YOUR_VIDEO_ID)
